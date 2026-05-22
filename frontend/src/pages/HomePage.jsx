@@ -4,7 +4,7 @@ import SearchForm from '../components/search/SearchForm';
 import { getOffers, getPopularDestinations } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { formatPrice, getTodayStr } from '../utils/formatters';
-import { destinationImages } from '../data/mockData';
+import { destinationImages } from '../utils/imageMap';
 import './HomePage.css';
 
 /* Import all images from src/img */

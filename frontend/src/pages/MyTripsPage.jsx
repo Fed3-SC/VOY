@@ -2,29 +2,28 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatTime, formatDate, formatPrice, formatServiceType } from '../utils/formatters';
+import { getMyBookings } from '../services/api';
 import './MyTripsPage.css';
 
 export default function MyTripsPage() {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // BUG-001 FIX: Solo cargar bookings del usuario autenticado
-    // Guard defensivo: si no hay user.id no cargamos nada
     if (!user?.id) return;
 
-    try {
-      const stored = JSON.parse(localStorage.getItem('voy_bookings') || '[]');
-      // Filtrar por userId para aislar datos por tenant (compatible con Sprint 2)
-      // Equivalente a: SELECT * FROM bookings WHERE user_id = $1
-      const userBookings = stored.filter(b => b.userId === user.id);
-      setBookings(userBookings.reverse());
-    } catch {
-      // localStorage corrupto — mostrar estado vacío sin crashear
-      setBookings([]);
-    }
-  }, [user?.id]); // Re-ejecutar si cambia el usuario en sesión
+    setLoading(true);
+    getMyBookings().then(res => {
+      if (res.success) {
+        setBookings(res.data);
+      } else {
+        setBookings([]);
+      }
+      setLoading(false);
+    });
+  }, [user?.id]);
 
   if (!isAuthenticated) {
     return (

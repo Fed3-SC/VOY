@@ -1,0 +1,204 @@
+/**
+ * Trips Service — Lógica de negocio de viajes
+ *
+ * Queries con JOINs a cities y companies para devolver datos enriquecidos.
+ */
+
+import { query } from '../config/database.js';
+import { createError } from '../utils/helpers.js';
+
+/**
+ * Formatea un viaje crudo de la BD al formato que espera el frontend.
+ */
+function formatTrip(row) {
+  return {
+    id: row.id,
+    companyId: row.company_id,
+    originCityId: row.origin_city_id,
+    destinationCityId: row.destination_city_id,
+    departureTime: row.departure_time,
+    arrivalTime: row.arrival_time,
+    durationMinutes: row.duration_minutes,
+    serviceType: row.service_type,
+    price: row.price,
+    totalSeats: row.total_seats,
+    availableSeats: row.available_seats,
+    active: row.active,
+    origin: {
+      id: row.origin_city_id,
+      name: row.origin_name,
+      province: row.origin_province,
+      terminalName: row.origin_terminal,
+    },
+    destination: {
+      id: row.destination_city_id,
+      name: row.dest_name,
+      province: row.dest_province,
+      terminalName: row.dest_terminal,
+    },
+    company: {
+      id: row.company_id,
+      name: row.company_name,
+      rating: parseFloat(row.company_rating),
+      logoUrl: row.company_logo,
+    },
+  };
+}
+
+/**
+ * Base SELECT con JOINs para obtener viajes enriquecidos.
+ */
+const BASE_SELECT = `
+  SELECT
+    t.*,
+    oc.name AS origin_name, oc.province AS origin_province, oc.terminal_name AS origin_terminal,
+    dc.name AS dest_name,   dc.province AS dest_province,   dc.terminal_name AS dest_terminal,
+    co.name AS company_name, co.rating AS company_rating, co.logo_url AS company_logo
+  FROM trips t
+  JOIN cities oc    ON t.origin_city_id = oc.id
+  JOIN cities dc    ON t.destination_city_id = dc.id
+  JOIN companies co ON t.company_id = co.id
+`;
+
+/**
+ * Busca viajes por ruta y opcionalmente por fecha.
+ * @param {{ origin, destination, date, passengers }} params
+ * @returns {object[]} Viajes enriquecidos
+ */
+export async function search({ origin, destination, date, passengers = 1 }) {
+  let sql = `${BASE_SELECT} WHERE t.active = TRUE AND t.origin_city_id = $1 AND t.destination_city_id = $2`;
+  const params = [origin, destination];
+
+  if (date) {
+    sql += ` AND DATE(t.departure_time) = $3`;
+    params.push(date);
+  }
+
+  // Solo viajes con suficientes asientos
+  if (passengers > 1) {
+    sql += ` AND t.available_seats >= $${params.length + 1}`;
+    params.push(passengers);
+  }
+
+  sql += ` ORDER BY t.departure_time ASC`;
+
+  const result = await query(sql, params);
+  return result.rows.map(formatTrip);
+}
+
+/**
+ * Obtiene un viaje por su ID con datos enriquecidos.
+ * @param {number} id
+ * @returns {object} Viaje enriquecido
+ */
+export async function getById(id) {
+  const result = await query(`${BASE_SELECT} WHERE t.id = $1`, [id]);
+
+  if (result.rows.length === 0) {
+    throw createError('Viaje no encontrado', 404);
+  }
+
+  return formatTrip(result.rows[0]);
+}
+
+/**
+ * Lista todos los viajes activos (con paginación básica).
+ * @param {number} limit
+ * @param {number} offset
+ * @returns {object[]}
+ */
+export async function getAll(limit = 50, offset = 0) {
+  const result = await query(
+    `${BASE_SELECT} WHERE t.active = TRUE ORDER BY t.departure_time ASC LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+  return result.rows.map(formatTrip);
+}
+
+/**
+ * Obtiene ofertas calculadas dinámicamente.
+ * Selecciona las 3 rutas más baratas desde Buenos Aires (id=1) para hoy.
+ */
+export async function getOffers() {
+  const result = await query(`
+    SELECT DISTINCT ON (t.destination_city_id)
+      t.destination_city_id,
+      dc.name AS dest_name,
+      MIN(t.price) AS min_price,
+      t.origin_city_id
+    FROM trips t
+    JOIN cities dc ON t.destination_city_id = dc.id
+    WHERE t.active = TRUE
+      AND t.origin_city_id = 1
+      AND t.departure_time >= NOW()
+    GROUP BY t.destination_city_id, dc.name, t.origin_city_id
+    ORDER BY t.destination_city_id, min_price ASC
+  `, []);
+
+  // Mapeo de destinos a image keys e info de ofertas
+  const offerMap = {
+    2: { imageQuery: 'mar-del-plata', discount: 27 },
+    3: { imageQuery: 'cordoba',       discount: 24 },
+    6: { imageQuery: 'bariloche',     discount: 23 },
+  };
+
+  return result.rows
+    .filter(row => offerMap[row.destination_city_id])
+    .map(row => {
+      const info = offerMap[row.destination_city_id];
+      const price = row.min_price;
+      const originalPrice = Math.round(price / (1 - info.discount / 100));
+      return {
+        id: row.destination_city_id,
+        title: row.dest_name,
+        subtitle: 'Desde Buenos Aires',
+        price,
+        originalPrice,
+        discount: info.discount,
+        imageQuery: info.imageQuery,
+        originId: 1,
+        destinationId: row.destination_city_id,
+      };
+    });
+}
+
+/**
+ * Obtiene destinos populares con conteo de viajes para hoy.
+ */
+export async function getPopularDestinations() {
+  const result = await query(`
+    SELECT
+      dc.id AS city_id,
+      dc.name,
+      COUNT(t.id) AS trips_count
+    FROM trips t
+    JOIN cities dc ON t.destination_city_id = dc.id
+    WHERE t.active = TRUE
+      AND t.origin_city_id = 1
+      AND DATE(t.departure_time) = CURRENT_DATE
+    GROUP BY dc.id, dc.name
+    ORDER BY trips_count DESC
+    LIMIT 8
+  `, []);
+
+  // Mapeo de cityId a imageKey
+  const imageKeys = {
+    2: 'mar-del-plata',
+    3: 'cordoba',
+    4: 'mendoza',
+    5: 'rosario',
+    6: 'bariloche',
+    7: 'salta',
+    8: 'neuquen',
+    9: 'tucuman',
+    10: 'santiago',
+  };
+
+  return result.rows.map((row, idx) => ({
+    id: idx + 1,
+    cityId: row.city_id,
+    name: row.name,
+    imageKey: imageKeys[row.city_id] || null,
+    tripsCount: parseInt(row.trips_count),
+  }));
+}

@@ -16,13 +16,13 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const res = await apiLogin(email, password);
-    if (res.success) setUser(res.data);
+    if (res.success) setUser(res.data.user);
     return res;
   }, []);
 
   const register = useCallback(async (userData) => {
     const res = await apiRegister(userData);
-    if (res.success) setUser(res.data);
+    if (res.success) setUser(res.data.user);
     return res;
   }, []);
 
