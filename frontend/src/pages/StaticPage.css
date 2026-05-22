@@ -1,0 +1,310 @@
+/* ═══════════════════════════════════════
+   StaticPage.css — Páginas de soporte
+   Compartido por: HelpCenter, Terms, Privacy, Contact
+   ═══════════════════════════════════════ */
+
+.static-page {
+  min-height: 80vh;
+  padding-bottom: var(--space-3xl);
+}
+
+/* Hero */
+.static-hero {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+  color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.static-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+}
+
+.static-hero-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: var(--space-md);
+  position: relative;
+  z-index: 1;
+}
+
+.static-hero-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  position: relative;
+  z-index: 1;
+}
+
+.static-hero-subtitle {
+  font-size: var(--font-size-lg);
+  opacity: 0.85;
+  position: relative;
+  z-index: 1;
+}
+
+/* Content */
+.static-content {
+  padding-top: var(--space-3xl);
+}
+
+.static-section {
+  margin-bottom: var(--space-2xl);
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: box-shadow var(--transition-base);
+}
+
+.static-section:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.static-section-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2px solid var(--color-primary);
+  display: inline-block;
+}
+
+.static-text {
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  font-size: var(--font-size-base);
+}
+
+.static-list {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.static-list li {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  padding: var(--space-xs) 0;
+}
+
+/* Buttons */
+.static-actions {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-xl);
+}
+
+.static-btn {
+  padding: var(--space-sm) var(--space-xl);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: none;
+}
+
+.static-btn-primary {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.static-btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.static-btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.static-btn-secondary:hover {
+  background: var(--color-border);
+  transform: translateY(-2px);
+}
+
+/* FAQ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.faq-item {
+  padding: var(--space-lg);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-primary);
+}
+
+.faq-question {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.faq-answer {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+}
+
+.static-contact-cta {
+  text-align: center;
+}
+
+.static-contact-cta .static-actions {
+  justify-content: center;
+}
+
+/* Contact */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.contact-info-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.contact-info-item strong {
+  display: block;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+
+.contact-info-item p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.contact-form-wrapper {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2xl);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.contact-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.contact-input {
+  padding: var(--space-sm) var(--space-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contact-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-submit {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--font-size-base);
+}
+
+.contact-success {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.contact-success-icon {
+  font-size: 4rem;
+}
+
+.contact-success h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.contact-success p {
+  color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .static-hero-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .static-actions {
+    flex-direction: column;
+  }
+
+  .static-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,219 @@
+.trip-card {
+  display: grid;
+  grid-template-columns: 180px 1fr 200px;
+  gap: var(--space-lg);
+  align-items: center;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-base);
+}
+
+.trip-card:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Company */
+.trip-card-company {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.trip-company-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+}
+
+.trip-company-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trip-company-name {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.trip-company-rating {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Route */
+.trip-card-route {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  justify-content: center;
+}
+
+.trip-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 100px;
+}
+
+.trip-time {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.trip-city {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.trip-terminal {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.trip-duration-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.trip-duration {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.trip-line {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+
+.trip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.trip-dash {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-200));
+}
+
+.trip-service {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Right side */
+.trip-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-sm);
+}
+
+.trip-price-block {
+  text-align: right;
+}
+
+.trip-price {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  display: block;
+}
+
+.trip-price-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.trip-seats-count {
+  font-size: var(--font-size-xs);
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.trip-seats-count.low {
+  color: var(--color-warning);
+}
+
+.trip-select-btn {
+  padding: 10px 24px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.trip-select-btn:hover {
+  background: var(--color-accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .trip-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .trip-card-company {
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .trip-card-right {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  .trip-price-block {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .trip-card-route {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .trip-line {
+    transform: rotate(90deg);
+    width: 60px;
+  }
+}

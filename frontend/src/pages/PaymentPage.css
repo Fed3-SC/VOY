@@ -1,0 +1,229 @@
+.payment-page {
+  min-height: 100vh;
+  padding-top: calc(var(--navbar-height) + var(--space-xl));
+  padding-bottom: var(--space-3xl);
+  background: var(--color-bg);
+}
+
+.payment-header {
+  margin-bottom: var(--space-xl);
+}
+
+/* Stepper */
+.payment-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-xl);
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-text-muted);
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+.step.active .step-number {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.step.completed .step-number {
+  background: var(--color-success);
+  color: var(--color-white);
+  border-color: var(--color-success);
+}
+
+.step-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.step.active .step-label,
+.step.completed .step-label {
+  color: var(--color-text);
+}
+
+.step-line {
+  width: 60px;
+  height: 2px;
+  background: var(--color-border);
+  margin: 0 var(--space-sm);
+  margin-bottom: 24px;
+}
+
+.step-line.completed {
+  background: var(--color-success);
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, var(--color-success), var(--color-primary));
+}
+
+/* Section titles */
+.payment-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-lg);
+}
+
+/* Passenger info */
+.passenger-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.passenger-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.passenger-info-label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.passenger-info-value {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* Payment methods */
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.payment-method-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.payment-method-card:hover {
+  border-color: var(--color-primary-200);
+}
+
+.payment-method-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-50);
+}
+
+.payment-radio {
+  display: none;
+}
+
+.payment-method-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.payment-method-info {
+  flex: 1;
+}
+
+.payment-method-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.payment-method-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.payment-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.payment-method-card.selected .payment-check {
+  opacity: 1;
+}
+
+/* Trip summary in sidebar */
+.payment-trip-summary {
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.payment-trip-route {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.payment-trip-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-trip-details span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.booking-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .payment-stepper {
+    transform: scale(0.85);
+  }
+
+  .passenger-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-line {
+    width: 30px;
+  }
+}
