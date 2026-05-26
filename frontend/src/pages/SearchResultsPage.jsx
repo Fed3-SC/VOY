@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams as useRouterSearchParams, useNavigate } from 'react-router-dom';
 import TripCard from '../components/trips/TripCard';
 import { searchTrips, getCities } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { formatDate } from '../utils/formatters';
 import './SearchResultsPage.css';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function SearchResultsPage() {
   const [routerParams] = useRouterSearchParams();
@@ -14,6 +16,7 @@ export default function SearchResultsPage() {
   const [loading, setLoading] = useState(true);
   const [cities, setCities] = useState([]);
   const [sortBy, setSortBy] = useState('price');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const origin = parseInt(routerParams.get('origin'));
   const destination = parseInt(routerParams.get('destination'));
@@ -29,6 +32,7 @@ export default function SearchResultsPage() {
   useEffect(() => {
     if (!origin || !destination) return;
     setLoading(true);
+    setCurrentPage(1);
     searchTrips({ origin, destination, date, passengers }).then(res => {
       if (res.success) setTrips(res.data);
       setLoading(false);
@@ -38,19 +42,33 @@ export default function SearchResultsPage() {
   const originCity = cities.find(c => c.id === origin);
   const destCity = cities.find(c => c.id === destination);
 
-  const sortedTrips = [...trips].sort((a, b) => {
-    switch (sortBy) {
-      case 'price': return a.price - b.price;
-      case 'price-desc': return b.price - a.price;
-      case 'departure': return new Date(a.departureTime) - new Date(b.departureTime);
-      case 'duration': return a.durationMinutes - b.durationMinutes;
-      default: return 0;
-    }
-  });
+  const sortedTrips = useMemo(() => {
+    return [...trips].sort((a, b) => {
+      switch (sortBy) {
+        case 'price': return a.price - b.price;
+        case 'price-desc': return b.price - a.price;
+        case 'departure': return new Date(a.departureTime) - new Date(b.departureTime);
+        case 'duration': return a.durationMinutes - b.durationMinutes;
+        default: return 0;
+      }
+    });
+  }, [trips, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(sortedTrips.length / ITEMS_PER_PAGE);
+  const paginatedTrips = sortedTrips.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const handleSelectTrip = (trip) => {
     setSelectedTrip({ ...trip, passengers });
     navigate(`/reserva/${trip.id}`);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -89,7 +107,7 @@ export default function SearchResultsPage() {
               <button
                 key={opt.value}
                 className={`sort-btn ${sortBy === opt.value ? 'active' : ''}`}
-                onClick={() => setSortBy(opt.value)}
+                onClick={() => { setSortBy(opt.value); setCurrentPage(1); }}
               >
                 {opt.label}
               </button>
@@ -112,11 +130,56 @@ export default function SearchResultsPage() {
             </button>
           </div>
         ) : (
-          <div className="results-list stagger-children">
-            {sortedTrips.map(trip => (
-              <TripCard key={trip.id} trip={trip} onSelect={handleSelectTrip} />
-            ))}
-          </div>
+          <>
+            <div className="results-list stagger-children">
+              {paginatedTrips.map(trip => (
+                <TripCard key={trip.id} trip={trip} onSelect={handleSelectTrip} />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="results-pagination" id="results-pagination">
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  ← Anterior
+                </button>
+
+                <div className="pagination-pages">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+                    .map((p, idx, arr) => (
+                      <span key={p}>
+                        {idx > 0 && arr[idx - 1] !== p - 1 && (
+                          <span className="pagination-ellipsis">…</span>
+                        )}
+                        <button
+                          className={`pagination-page ${currentPage === p ? 'active' : ''}`}
+                          onClick={() => handlePageChange(p)}
+                        >
+                          {p}
+                        </button>
+                      </span>
+                    ))}
+                </div>
+
+                <button
+                  className="pagination-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Siguiente →
+                </button>
+              </div>
+            )}
+
+            <p className="results-showing">
+              Mostrando {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, sortedTrips.length)} de {sortedTrips.length} viajes
+            </p>
+          </>
         )}
       </div>
     </div>

@@ -34,7 +34,7 @@ async function request(endpoint, options = {}) {
       return { success: false, error: data.error || 'Error del servidor' };
     }
 
-    return { success: true, data: data.data };
+    return { success: true, data: data.data, meta: data.meta };
   } catch (error) {
     console.error(`Error en request a ${endpoint}:`, error);
     return { success: false, error: 'Error de conexión con el servidor' };
@@ -45,6 +45,12 @@ async function request(endpoint, options = {}) {
 
 export async function getCities() {
   return request('/cities');
+}
+
+/* ──────────────────────────── COMPANIES ──────────────────────────── */
+
+export async function getCompanies() {
+  return request('/companies');
 }
 
 /* ──────────────────────────── TRIPS ──────────────────────────── */
@@ -61,7 +67,15 @@ export async function getTripById(id) {
   return request(`/trips/${id}`);
 }
 
-/* ──────────────────────────── OFFERS & POPULAR DESTINATIONS ──────────────────────────── */
+export async function getAllTrips(limit = 50, offset = 0) {
+  return request(`/trips?limit=${limit}&offset=${offset}`);
+}
+
+/* ──────────────────────────── FEATURED & OFFERS ──────────────────────────── */
+
+export async function getFeaturedTrips(count = 6) {
+  return request(`/trips/featured?count=${count}`);
+}
 
 export async function getOffers() {
   return request('/trips/offers');
@@ -69,6 +83,28 @@ export async function getOffers() {
 
 export async function getPopularDestinations() {
   return request('/trips/popular-destinations');
+}
+
+/* ──────────────────────────── ADMIN CRUD ──────────────────────────── */
+
+export async function createTrip(tripData) {
+  return request('/trips', {
+    method: 'POST',
+    body: JSON.stringify(tripData),
+  });
+}
+
+export async function updateTrip(id, tripData) {
+  return request(`/trips/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(tripData),
+  });
+}
+
+export async function deleteTrip(id) {
+  return request(`/trips/${id}`, {
+    method: 'DELETE',
+  });
 }
 
 /* ──────────────────────────── BOOKINGS ──────────────────────────── */

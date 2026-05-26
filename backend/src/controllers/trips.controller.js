@@ -1,5 +1,6 @@
 /**
  * Trips Controller — Endpoints de viajes
+ * Incluye búsqueda, listado, CRUD admin, y viajes destacados.
  */
 
 import * as tripsService from '../services/trips.service.js';
@@ -12,10 +13,12 @@ export async function getAll(req, res, next) {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
     const trips = await tripsService.getAll(limit, offset);
+    const total = await tripsService.getCount();
 
     res.json({
       success: true,
       data: trips,
+      meta: { total, limit, offset },
     });
   } catch (err) {
     next(err);
@@ -53,15 +56,17 @@ export async function search(req, res, next) {
 }
 
 /**
- * GET /api/trips/:id
+ * GET /api/trips/featured
+ * Viajes destacados aleatorios con variedad de destinos.
  */
-export async function getById(req, res, next) {
+export async function getFeatured(req, res, next) {
   try {
-    const trip = await tripsService.getById(parseInt(req.params.id));
+    const count = parseInt(req.query.count) || 6;
+    const trips = await tripsService.getFeatured(count);
 
     res.json({
       success: true,
-      data: trip,
+      data: trips,
     });
   } catch (err) {
     next(err);
@@ -94,6 +99,70 @@ export async function getPopularDestinations(req, res, next) {
     res.json({
       success: true,
       data: destinations,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/trips/:id
+ */
+export async function getById(req, res, next) {
+  try {
+    const trip = await tripsService.getById(parseInt(req.params.id));
+
+    res.json({
+      success: true,
+      data: trip,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/trips (Admin CRUD)
+ */
+export async function create(req, res, next) {
+  try {
+    const trip = await tripsService.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      data: trip,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PUT /api/trips/:id (Admin CRUD)
+ */
+export async function update(req, res, next) {
+  try {
+    const trip = await tripsService.update(parseInt(req.params.id), req.body);
+
+    res.json({
+      success: true,
+      data: trip,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * DELETE /api/trips/:id (Admin CRUD — soft delete)
+ */
+export async function remove(req, res, next) {
+  try {
+    const result = await tripsService.remove(parseInt(req.params.id));
+
+    res.json({
+      success: true,
+      data: result,
     });
   } catch (err) {
     next(err);

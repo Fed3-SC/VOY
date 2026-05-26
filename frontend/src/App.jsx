@@ -10,6 +10,8 @@ import AuthPage from './pages/AuthPage';
 import PaymentPage from './pages/PaymentPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import MyTripsPage from './pages/MyTripsPage';
+import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 // BUG-003a: Páginas de soporte
 import HelpCenterPage from './pages/HelpCenterPage';
 import TermsPage from './pages/TermsPage';
@@ -33,6 +35,8 @@ export default function App() {
                 <Route path="/pago" element={<PaymentPage />} />
                 <Route path="/confirmacion" element={<ConfirmationPage />} />
                 <Route path="/mis-viajes" element={<MyTripsPage />} />
+                <Route path="/perfil" element={<ProfilePage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 {/* BUG-003a: Rutas de páginas de soporte */}
                 <Route path="/ayuda" element={<HelpCenterPage />} />
                 <Route path="/terminos" element={<TermsPage />} />

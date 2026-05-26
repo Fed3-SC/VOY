@@ -1,0 +1,191 @@
+/* ═══════════════════════════════════════════
+   ProfilePage Styles
+   ═══════════════════════════════════════════ */
+
+.profile-page {
+  padding-top: calc(var(--navbar-height) + var(--space-2xl));
+  padding-bottom: var(--space-3xl);
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.profile-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: var(--space-xl);
+}
+
+/* ─── Card ─── */
+.profile-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  padding: var(--space-2xl);
+  max-width: 640px;
+}
+
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.profile-avatar-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: var(--font-size-3xl);
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(44, 50, 104, 0.2);
+}
+
+.profile-fullname {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.profile-member-since {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ─── Fields ─── */
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.profile-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+}
+
+.profile-field-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.profile-field-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ─── Actions ─── */
+.profile-actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+  max-width: 640px;
+}
+
+.profile-action-btn {
+  flex: 1;
+  padding: 14px var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.profile-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-action-btn.secondary {
+  background: var(--color-white);
+  color: var(--color-primary);
+  border-color: var(--color-border);
+}
+
+.profile-action-btn.secondary:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-50);
+}
+
+/* ─── Empty State ─── */
+.profile-empty {
+  text-align: center;
+  padding: var(--space-3xl);
+}
+
+.profile-empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--space-lg);
+}
+
+.profile-empty h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.profile-empty p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xl);
+}
+
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.profile-btn:hover {
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .profile-card {
+    padding: var(--space-lg);
+  }
+
+  .profile-avatar-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+}

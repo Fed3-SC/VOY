@@ -2,6 +2,7 @@
  * Trips Service — Lógica de negocio de viajes
  *
  * Queries con JOINs a cities y companies para devolver datos enriquecidos.
+ * Incluye CRUD para administración y endpoint de viajes featured aleatorios.
  */
 
 import { query } from '../config/database.js';
@@ -116,6 +117,14 @@ export async function getAll(limit = 50, offset = 0) {
 }
 
 /**
+ * Obtiene el conteo total de viajes activos (para paginación).
+ */
+export async function getCount() {
+  const result = await query('SELECT COUNT(*)::int AS count FROM trips WHERE active = TRUE', []);
+  return result.rows[0].count;
+}
+
+/**
  * Obtiene ofertas calculadas dinámicamente.
  * Selecciona las 3 rutas más baratas desde Buenos Aires (id=1) para hoy.
  */
@@ -201,4 +210,124 @@ export async function getPopularDestinations() {
     imageKey: imageKeys[row.city_id] || null,
     tripsCount: parseInt(row.trips_count),
   }));
+}
+
+/**
+ * Obtiene viajes destacados aleatorios con variedad de destinos.
+ * Selecciona 1 viaje por destino (aleatorio) y luego mezcla.
+ */
+export async function getFeatured(count = 6) {
+  const result = await query(`
+    SELECT DISTINCT ON (t.destination_city_id)
+      t.*,
+      oc.name AS origin_name, oc.province AS origin_province, oc.terminal_name AS origin_terminal,
+      dc.name AS dest_name,   dc.province AS dest_province,   dc.terminal_name AS dest_terminal,
+      co.name AS company_name, co.rating AS company_rating, co.logo_url AS company_logo
+    FROM trips t
+    JOIN cities oc    ON t.origin_city_id = oc.id
+    JOIN cities dc    ON t.destination_city_id = dc.id
+    JOIN companies co ON t.company_id = co.id
+    WHERE t.active = TRUE
+      AND t.departure_time >= NOW()
+      AND t.available_seats > 0
+    ORDER BY t.destination_city_id, RANDOM()
+    LIMIT $1
+  `, [count]);
+
+  // Shuffle the results for variety
+  const trips = result.rows.map(formatTrip);
+  for (let i = trips.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [trips[i], trips[j]] = [trips[j], trips[i]];
+  }
+
+  return trips;
+}
+
+/* ──────────────── CRUD ADMIN ──────────────── */
+
+/**
+ * Crea un nuevo viaje.
+ */
+export async function create(data) {
+  const {
+    companyId, originCityId, destinationCityId,
+    departureTime, arrivalTime, durationMinutes,
+    serviceType, price, totalSeats, availableSeats,
+  } = data;
+
+  if (originCityId === destinationCityId) {
+    throw createError('El origen y destino no pueden ser iguales', 400);
+  }
+
+  const result = await query(`
+    INSERT INTO trips (
+      company_id, origin_city_id, destination_city_id,
+      departure_time, arrival_time, duration_minutes,
+      service_type, price, total_seats, available_seats, active
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, TRUE)
+    RETURNING id
+  `, [
+    companyId, originCityId, destinationCityId,
+    departureTime, arrivalTime, durationMinutes,
+    serviceType, price, totalSeats, availableSeats ?? totalSeats,
+  ]);
+
+  return getById(result.rows[0].id);
+}
+
+/**
+ * Actualiza un viaje existente (update parcial).
+ */
+export async function update(id, data) {
+  // Verificar que existe
+  await getById(id);
+
+  const fields = [];
+  const values = [];
+  let paramIndex = 1;
+
+  const fieldMap = {
+    companyId: 'company_id',
+    originCityId: 'origin_city_id',
+    destinationCityId: 'destination_city_id',
+    departureTime: 'departure_time',
+    arrivalTime: 'arrival_time',
+    durationMinutes: 'duration_minutes',
+    serviceType: 'service_type',
+    price: 'price',
+    totalSeats: 'total_seats',
+    availableSeats: 'available_seats',
+  };
+
+  for (const [jsKey, dbCol] of Object.entries(fieldMap)) {
+    if (data[jsKey] !== undefined) {
+      fields.push(`${dbCol} = $${paramIndex}`);
+      values.push(data[jsKey]);
+      paramIndex++;
+    }
+  }
+
+  if (fields.length === 0) {
+    throw createError('No se proporcionaron campos para actualizar', 400);
+  }
+
+  values.push(id);
+  await query(
+    `UPDATE trips SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
+    values
+  );
+
+  return getById(id);
+}
+
+/**
+ * Elimina un viaje (soft delete — active = FALSE).
+ */
+export async function remove(id) {
+  // Verificar que existe
+  await getById(id);
+
+  await query('UPDATE trips SET active = FALSE WHERE id = $1', [id]);
+  return { deleted: true };
 }
