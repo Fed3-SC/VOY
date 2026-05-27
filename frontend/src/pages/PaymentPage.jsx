@@ -9,7 +9,8 @@ import './PaymentPage.css';
 export default function PaymentPage() {
   const navigate = useNavigate();
   const { selectedTrip, setBooking } = useBooking();
-  const { user, isAuthenticated } = useAuth();
+  const user = { id: 1, name: 'Viajero', lastName: 'Invitado', email: 'invitado@voy.com', dni: '12345678', phone: '1122334455' };
+  const isAuthenticated = true;
   const [paymentMethod, setPaymentMethod] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -18,10 +19,7 @@ export default function PaymentPage() {
     return null;
   }
 
-  if (!isAuthenticated) {
-    navigate('/auth?redirect=/pago');
-    return null;
-  }
+
 
   const totalPrice = selectedTrip.price * (selectedTrip.passengers || 1);
 

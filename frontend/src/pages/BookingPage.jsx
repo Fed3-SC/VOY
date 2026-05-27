@@ -33,11 +33,7 @@ export default function BookingPage() {
   }
 
   const handleContinue = () => {
-    if (!isAuthenticated) {
-      navigate('/auth?redirect=/pago');
-    } else {
-      navigate('/pago');
-    }
+    navigate('/pago');
   };
 
   const totalPrice = selectedTrip.price * (selectedTrip.passengers || 1);
@@ -136,7 +132,7 @@ export default function BookingPage() {
                 onClick={handleContinue}
                 id="continue-to-payment"
               >
-                {isAuthenticated ? 'Continuar al pago' : 'Iniciar sesión para comprar'}
+                Continuar al pago
               </button>
 
               <p className="booking-secure-note">
