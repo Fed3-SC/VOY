@@ -212,13 +212,9 @@ export async function getPopularDestinations() {
   }));
 }
 
-/**
- * Obtiene viajes destacados aleatorios con variedad de destinos.
- * Selecciona 1 viaje por destino (aleatorio) y luego mezcla.
- */
-export async function getFeatured(count = 6) {
+export async function getFeatured(count = 10) {
   const result = await query(`
-    SELECT DISTINCT ON (t.destination_city_id)
+    SELECT
       t.*,
       oc.name AS origin_name, oc.province AS origin_province, oc.terminal_name AS origin_terminal,
       dc.name AS dest_name,   dc.province AS dest_province,   dc.terminal_name AS dest_terminal,
@@ -230,18 +226,11 @@ export async function getFeatured(count = 6) {
     WHERE t.active = TRUE
       AND t.departure_time >= NOW()
       AND t.available_seats > 0
-    ORDER BY t.destination_city_id, RANDOM()
+    ORDER BY RANDOM()
     LIMIT $1
   `, [count]);
 
-  // Shuffle the results for variety
-  const trips = result.rows.map(formatTrip);
-  for (let i = trips.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [trips[i], trips[j]] = [trips[j], trips[i]];
-  }
-
-  return trips;
+  return result.rows.map(formatTrip);
 }
 
 /* ──────────────── CRUD ADMIN ──────────────── */

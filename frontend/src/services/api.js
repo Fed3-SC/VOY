@@ -73,7 +73,7 @@ export async function getAllTrips(limit = 50, offset = 0) {
 
 /* ──────────────────────────── FEATURED & OFFERS ──────────────────────────── */
 
-export async function getFeaturedTrips(count = 6) {
+export async function getFeaturedTrips(count = 10) {
   return request(`/trips/featured?count=${count}`);
 }
 

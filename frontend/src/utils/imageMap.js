@@ -3,6 +3,7 @@
  * Las imágenes reales viven en frontend/src/img/
  */
 export const destinationImages = {
+  'buenos-aires': 'buenos aires.png',
   'mar-del-plata': 'mar del plata.jpg',
   'bariloche': 'bariloche.jpg',
   'cordoba': 'cordoba.jpg',
@@ -18,6 +19,7 @@ export const destinationImages = {
  * Mapeo de city ID a imageKey para uso programático.
  */
 export const cityIdToImageKey = {
+  1: 'buenos-aires',
   2: 'mar-del-plata',
   3: 'cordoba',
   4: 'mendoza',
@@ -36,6 +38,7 @@ export function getImageKeyByCityName(cityName) {
   if (!cityName) return null;
   const normalized = cityName.toLowerCase().trim();
   const nameMap = {
+    'buenos aires': 'buenos-aires',
     'mar del plata': 'mar-del-plata',
     'bariloche': 'bariloche',
     'córdoba': 'cordoba',

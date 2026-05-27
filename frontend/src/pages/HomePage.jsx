@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/search/SearchForm';
-import { getOffers, getPopularDestinations, getFeaturedTrips } from '../services/api';
+import { getPopularDestinations, getAllTrips, getFeaturedTrips } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { formatPrice, formatTime, formatDuration, formatServiceType, getTodayStr } from '../utils/formatters';
 import { destinationImages, getImageKeyByCityName } from '../utils/imageMap';
@@ -56,20 +56,18 @@ function useSlider(ref) {
 }
 
 export default function HomePage() {
-  const [offers, setOffers] = useState([]);
-  const [popularDests, setPopularDests] = useState([]);
   const [featuredTrips, setFeaturedTrips] = useState([]);
+  const [popularDests, setPopularDests] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [totalTrips, setTotalTrips] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [tripsLoading, setTripsLoading] = useState(false);
   const navigate = useNavigate();
   const { setSearchParams, resetSearch } = useBooking();
 
-  const offersRef = useRef(null);
   const destsRef = useRef(null);
-  const featuredRef = useRef(null);
-
-  const offersSlider = useSlider(offersRef);
   const destsSlider = useSlider(destsRef);
-  const featuredSlider = useSlider(featuredRef);
 
   // BUG-002 FIX: Limpiar estado de búsqueda anterior al montar el Home
   useEffect(() => {
@@ -78,36 +76,29 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      getOffers(),
-      getPopularDestinations(),
-      getFeaturedTrips(8),
-    ]).then(([offersRes, destsRes, featuredRes]) => {
-      if (offersRes.success) setOffers(offersRes.data);
-      if (destsRes.success) setPopularDests(destsRes.data);
+      getFeaturedTrips(10),
+      getPopularDestinations()
+    ]).then(([featuredRes, destsRes]) => {
       if (featuredRes.success) setFeaturedTrips(featuredRes.data);
+      if (destsRes.success) setPopularDests(destsRes.data);
       setLoading(false);
-      // Re-check slider after data loads
       setTimeout(() => {
-        offersSlider.checkScroll();
         destsSlider.checkScroll();
-        featuredSlider.checkScroll();
       }, 100);
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleOfferClick = (offer) => {
-    setSearchParams(prev => ({
-      ...prev,
-      origin: offer.originId,
-      destination: offer.destinationId,
-    }));
-    const params = new URLSearchParams({
-      origin: offer.originId,
-      destination: offer.destinationId,
-      passengers: 1,
+  useEffect(() => {
+    setTripsLoading(true);
+    getAllTrips(10, (page - 1) * 10).then(res => {
+      if (res.success) {
+        setTrips(res.data);
+        setTotalTrips(res.meta?.total || 0);
+      }
+      setTripsLoading(false);
     });
-    navigate(`/resultados?${params.toString()}`);
-  };
+  }, [page]);
+
 
   const handleDestinationClick = (dest) => {
     const today = getTodayStr();
@@ -160,76 +151,76 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Offers Section with Slider */}
-      <section className="section" id="offers-section">
-        <div className="container">
-          <h2 className="section-title">🔥 Ofertas Destacadas</h2>
-          <p className="section-subtitle">Los mejores precios para tus próximas vacaciones</p>
 
-          <div className="slider-wrapper">
-            {offersSlider.canScrollLeft && (
-              <button className="slider-btn slider-btn-left" onClick={() => offersSlider.scroll(-1)} aria-label="Anterior">
-                ‹
-              </button>
-            )}
-            <div className="slider-track" ref={offersRef}>
-              {offers.map(offer => (
+      {/* Featured Trips — Random */}
+      {featuredTrips.length > 0 && (
+        <section className="section featured-section" id="featured-section" style={{ paddingBottom: 0 }}>
+          <div className="container">
+            <h2 className="section-title">✨ Recomendaciones para vos</h2>
+            <p className="section-subtitle">Descubrí opciones increíbles de forma aleatoria</p>
+
+            <div className="featured-grid">
+              {featuredTrips.map(trip => (
                 <div
-                  key={offer.id}
-                  className="offer-card"
-                  onClick={() => handleOfferClick(offer)}
-                  id={`offer-card-${offer.id}`}
+                  key={trip.id}
+                  className="featured-card"
+                  onClick={() => handleFeaturedClick(trip)}
+                  id={`random-card-${trip.id}`}
                 >
-                  <div className="offer-image">
-                    {getDestinationImage(offer.imageQuery) ? (
+                  <div className="featured-image">
+                    {getImageByCityName(trip.destination?.name) ? (
                       <img
-                        src={getDestinationImage(offer.imageQuery)}
-                        alt={offer.title}
-                        className="offer-img"
+                        src={getImageByCityName(trip.destination?.name)}
+                        alt={trip.destination?.name}
+                        className="featured-img"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="offer-image-placeholder">
-                        <span className="offer-emoji">🌍</span>
+                      <div className="featured-image-placeholder">
+                        <span>🗺️</span>
                       </div>
                     )}
-                    <div className="offer-badge">-{offer.discount}%</div>
+                    <div className="featured-overlay">
+                      <span className="featured-dest">{trip.destination?.name}</span>
+                    </div>
                   </div>
-                  <div className="offer-info">
-                    <h3 className="offer-title">{offer.title}</h3>
-                    <p className="offer-subtitle">{offer.subtitle}</p>
-                    <div className="offer-prices">
-                      <span className="offer-original">{formatPrice(offer.originalPrice)}</span>
-                      <span className="offer-current">{formatPrice(offer.price)}</span>
+                  <div className="featured-info">
+                    <div className="featured-route">
+                      <span className="featured-origin">{trip.origin?.name}</span>
+                      <span className="featured-arrow">→</span>
+                      <span className="featured-dest-name">{trip.destination?.name}</span>
+                    </div>
+                    <div className="featured-meta">
+                      <span>🕐 {formatTime(trip.departureTime)}</span>
+                      <span>⏱️ {formatDuration(trip.durationMinutes)}</span>
+                      <span className={`badge badge-${trip.serviceType === 'cama' ? 'accent' : 'primary'}`}>
+                        {formatServiceType(trip.serviceType)}
+                      </span>
+                    </div>
+                    <div className="featured-bottom">
+                      <span className="featured-company">{trip.company?.name}</span>
+                      <span className="featured-price">{formatPrice(trip.price)}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            {offersSlider.canScrollRight && (
-              <button className="slider-btn slider-btn-right" onClick={() => offersSlider.scroll(1)} aria-label="Siguiente">
-                ›
-              </button>
-            )}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Featured Trips — Random */}
-      {featuredTrips.length > 0 && (
-        <section className="section featured-section" id="featured-section">
-          <div className="container">
-            <h2 className="section-title">🚌 Viajes Disponibles</h2>
-            <p className="section-subtitle">Descubrí opciones para tu próximo destino</p>
+      {/* Trips Section — Paginated */}
+      <section className="section featured-section" id="trips-section">
+        <div className="container">
+          <h2 className="section-title">🚌 Viajes Disponibles</h2>
+          <p className="section-subtitle">Explorá todos nuestros viajes de forma ordenada</p>
 
-            <div className="slider-wrapper">
-              {featuredSlider.canScrollLeft && (
-                <button className="slider-btn slider-btn-left" onClick={() => featuredSlider.scroll(-1)} aria-label="Anterior">
-                  ‹
-                </button>
-              )}
-              <div className="slider-track" ref={featuredRef}>
-                {featuredTrips.map(trip => (
+          {tripsLoading ? (
+            <div className="spinner-container"><div className="spinner"></div></div>
+          ) : trips.length > 0 ? (
+            <>
+              <div className="featured-grid">
+                {trips.map(trip => (
                   <div
                     key={trip.id}
                     className="featured-card"
@@ -274,15 +265,42 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              {featuredSlider.canScrollRight && (
-                <button className="slider-btn slider-btn-right" onClick={() => featuredSlider.scroll(1)} aria-label="Siguiente">
-                  ›
+              
+              <div className="home-pagination">
+                <button 
+                  className="home-page-btn" 
+                  onClick={() => setPage(1)} 
+                  disabled={page === 1}
+                >
+                  ⏮️ Inicio
                 </button>
-              )}
+                <button 
+                  className="home-page-btn" 
+                  onClick={() => setPage(p => Math.max(1, p - 1))} 
+                  disabled={page === 1}
+                >
+                  ◀ Anterior
+                </button>
+                <span className="home-page-info">
+                  Página {page} de {Math.max(1, Math.ceil(totalTrips / 10))}
+                </span>
+                <button 
+                  className="home-page-btn" 
+                  onClick={() => setPage(p => Math.min(Math.ceil(totalTrips / 10), p + 1))} 
+                  disabled={page >= Math.ceil(totalTrips / 10)}
+                >
+                  Siguiente ▶
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="admin-empty">
+              <span className="admin-empty-icon">🚌</span>
+              <h3>No hay viajes disponibles por ahora</h3>
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       {/* Popular Destinations */}
       <section className="section destinations-section" id="destinations-section">

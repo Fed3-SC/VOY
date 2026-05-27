@@ -46,6 +46,21 @@ export default function AdminPage() {
   // Toast
   const [toast, setToast] = useState(null);
 
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => sessionStorage.getItem('adminAuth') === 'true');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+
+  const handleAdminAuth = (e) => {
+    e.preventDefault();
+    if (adminPassword === 'Voypromode123') {
+      setIsAdminAuthenticated(true);
+      sessionStorage.setItem('adminAuth', 'true');
+      setAdminPasswordError('');
+    } else {
+      setAdminPasswordError('Contraseña incorrecta');
+    }
+  };
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
@@ -62,18 +77,18 @@ export default function AdminPage() {
   }, [page]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isAdminAuthenticated) return;
 
     Promise.all([getCities(), getCompanies()]).then(([citiesRes, companiesRes]) => {
       if (citiesRes.success) setCities(citiesRes.data);
       if (companiesRes.success) setCompanies(companiesRes.data);
     });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isAdminAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isAdminAuthenticated) return;
     loadTrips();
-  }, [isAuthenticated, loadTrips]);
+  }, [isAuthenticated, isAdminAuthenticated, loadTrips]);
 
   if (!isAuthenticated) {
     return (
@@ -86,6 +101,36 @@ export default function AdminPage() {
             <button className="admin-btn-primary" onClick={() => navigate('/auth?redirect=/admin')}>
               Iniciar Sesión
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="admin-page">
+        <div className="container">
+          <div className="admin-empty animate-fade-in">
+            <span className="admin-empty-icon">🛡️</span>
+            <h2>Autenticación de Administrador</h2>
+            <p>Por favor, ingresá la contraseña de administrador para continuar.</p>
+            <form onSubmit={handleAdminAuth} className="admin-form" style={{ maxWidth: '400px', margin: '0 auto', marginTop: '20px' }}>
+              <div className="admin-form-group">
+                <input 
+                  type="password" 
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="Contraseña"
+                  style={{ textAlign: 'center' }}
+                  required
+                />
+              </div>
+              {adminPasswordError && <div className="admin-form-error" style={{ marginBottom: '15px' }}>{adminPasswordError}</div>}
+              <button type="submit" className="admin-btn-primary" style={{ width: '100%' }}>
+                Ingresar
+              </button>
+            </form>
           </div>
         </div>
       </div>
