@@ -72,6 +72,15 @@ export default function Navbar() {
             Inicio
           </Link>
 
+          <div className="navbar-actions">
+            <button className="navbar-btn-outline" onClick={() => {}}>
+              Iniciar Sesión
+            </button>
+            <button className="navbar-cta" onClick={() => {}}>
+              Crear cuenta
+            </button>
+          </div>
+
         </div>
 
         <button
