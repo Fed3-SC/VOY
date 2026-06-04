@@ -16,6 +16,8 @@ import bookingsRoutes from './routes/bookings.routes.js';
 import citiesRoutes from './routes/cities.routes.js';
 import paymentsRoutes from './routes/payments.routes.js';
 import companiesRoutes from './routes/companies.routes.js';
+import usersRoutes from './routes/users.routes.js';
+import featuresRoutes from './routes/features.routes.js';
 
 // Middlewares
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
@@ -44,6 +46,8 @@ app.use('/api/bookings', bookingsRoutes);
 app.use('/api/cities', citiesRoutes);
 app.use('/api/payments', paymentsRoutes);
 app.use('/api/companies', companiesRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/features', featuresRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

@@ -163,3 +163,43 @@ export async function logout() {
   localStorage.removeItem('voy_token');
   return { success: true };
 }
+
+/* ──────────────────────────── USERS (ADMIN) ──────────────────────────── */
+
+export async function getUsers() {
+  return request('/users');
+}
+
+export async function promoteUser(id) {
+  return request(`/users/${id}/promote`, { method: 'PATCH' });
+}
+
+export async function demoteUser(id) {
+  return request(`/users/${id}/demote`, { method: 'PATCH' });
+}
+
+/* ──────────────────────────── FEATURES ──────────────────────────── */
+
+export async function getFeatures() {
+  return request('/features');
+}
+
+export async function createFeature(data) {
+  return request('/features', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateFeature(id, data) {
+  return request(`/features/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteFeature(id) {
+  return request(`/features/${id}`, {
+    method: 'DELETE',
+  });
+}

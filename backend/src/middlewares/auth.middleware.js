@@ -57,3 +57,17 @@ export function optionalAuth(req, _res, next) {
 
   next();
 }
+
+/**
+ * Middleware AdminGuard: solo permite el paso a usuarios con is_admin = true.
+ * Debe usarse DESPUÉS de requireAuth.
+ */
+export function requireAdmin(req, res, next) {
+  if (!req.user || !req.user.is_admin) {
+    return res.status(403).json({
+      success: false,
+      error: 'Acceso denegado. Se requieren permisos de administrador.',
+    });
+  }
+  next();
+}

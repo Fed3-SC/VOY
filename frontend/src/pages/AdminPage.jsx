@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   getAllTrips, createTrip, updateTrip, deleteTrip,
-  getCities, getCompanies,
+  getCities, getCompanies, getFeatures,
 } from '../services/api';
 import { formatTime, formatDate, formatPrice, formatServiceType } from '../utils/formatters';
 import './AdminPage.css';
@@ -19,15 +19,17 @@ const EMPTY_FORM = {
   price: '',
   totalSeats: '',
   availableSeats: '',
+  featureIds: [],
 };
 
 export default function AdminPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [trips, setTrips] = useState([]);
   const [cities, setCities] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [allFeatures, setAllFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -46,21 +48,6 @@ export default function AdminPage() {
   // Toast
   const [toast, setToast] = useState(null);
 
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => sessionStorage.getItem('adminAuth') === 'true');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminPasswordError, setAdminPasswordError] = useState('');
-
-  const handleAdminAuth = (e) => {
-    e.preventDefault();
-    if (adminPassword === 'Voypromode123') {
-      setIsAdminAuthenticated(true);
-      sessionStorage.setItem('adminAuth', 'true');
-      setAdminPasswordError('');
-    } else {
-      setAdminPasswordError('Contraseña incorrecta');
-    }
-  };
-
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
@@ -77,18 +64,19 @@ export default function AdminPage() {
   }, [page]);
 
   useEffect(() => {
-    if (!isAuthenticated || !isAdminAuthenticated) return;
+    if (!isAuthenticated || !isAdmin) return;
 
-    Promise.all([getCities(), getCompanies()]).then(([citiesRes, companiesRes]) => {
+    Promise.all([getCities(), getCompanies(), getFeatures()]).then(([citiesRes, companiesRes, featuresRes]) => {
       if (citiesRes.success) setCities(citiesRes.data);
       if (companiesRes.success) setCompanies(companiesRes.data);
+      if (featuresRes.success) setAllFeatures(featuresRes.data);
     });
-  }, [isAuthenticated, isAdminAuthenticated]);
+  }, [isAuthenticated, isAdmin]);
 
   useEffect(() => {
-    if (!isAuthenticated || !isAdminAuthenticated) return;
+    if (!isAuthenticated || !isAdmin) return;
     loadTrips();
-  }, [isAuthenticated, isAdminAuthenticated, loadTrips]);
+  }, [isAuthenticated, isAdmin, loadTrips]);
 
   if (!isAuthenticated) {
     return (
@@ -107,30 +95,17 @@ export default function AdminPage() {
     );
   }
 
-  if (!isAdminAuthenticated) {
+  if (!isAdmin) {
     return (
       <div className="admin-page">
         <div className="container">
           <div className="admin-empty animate-fade-in">
             <span className="admin-empty-icon">🛡️</span>
-            <h2>Autenticación de Administrador</h2>
-            <p>Por favor, ingresá la contraseña de administrador para continuar.</p>
-            <form onSubmit={handleAdminAuth} className="admin-form" style={{ maxWidth: '400px', margin: '0 auto', marginTop: '20px' }}>
-              <div className="admin-form-group">
-                <input 
-                  type="password" 
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="Contraseña"
-                  style={{ textAlign: 'center' }}
-                  required
-                />
-              </div>
-              {adminPasswordError && <div className="admin-form-error" style={{ marginBottom: '15px' }}>{adminPasswordError}</div>}
-              <button type="submit" className="admin-btn-primary" style={{ width: '100%' }}>
-                Ingresar
-              </button>
-            </form>
+            <h2>Permisos insuficientes</h2>
+            <p>Tu cuenta no tiene permisos de administrador.</p>
+            <button className="admin-btn-secondary" onClick={() => navigate('/')}>
+              ← Volver al inicio
+            </button>
           </div>
         </div>
       </div>
@@ -162,6 +137,7 @@ export default function AdminPage() {
       price: trip.price,
       totalSeats: trip.totalSeats,
       availableSeats: trip.availableSeats,
+      featureIds: (trip.features || []).map(f => f.id),
     });
     setFormError('');
     setShowForm(true);
@@ -198,6 +174,7 @@ export default function AdminPage() {
       price: parseInt(form.price),
       totalSeats: parseInt(form.totalSeats),
       availableSeats: parseInt(form.availableSeats) || parseInt(form.totalSeats),
+      featureIds: form.featureIds || [],
     };
 
     let res;
@@ -243,9 +220,17 @@ export default function AdminPage() {
             <h1 className="admin-title">⚙️ Panel de Administración</h1>
             <p className="admin-subtitle">Gestión de viajes — {total} viajes activos</p>
           </div>
-          <button className="admin-btn-primary" onClick={openCreateForm} id="admin-add-trip">
-            ＋ Nuevo Viaje
-          </button>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button className="admin-btn-secondary" onClick={() => navigate('/admin/users')} id="admin-nav-users">
+              👥 Usuarios
+            </button>
+            <button className="admin-btn-secondary" onClick={() => navigate('/admin/features')} id="admin-nav-features">
+              ✨ Características
+            </button>
+            <button className="admin-btn-primary" onClick={openCreateForm} id="admin-add-trip">
+              ＋ Nuevo Viaje
+            </button>
+          </div>
         </div>
 
         {/* Trips Table */}
@@ -460,7 +445,7 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="admin-form-group">
+                  <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
                     <label>Asientos Disponibles</label>
                     <input
                       type="number"
@@ -471,6 +456,35 @@ export default function AdminPage() {
                       min="0"
                     />
                   </div>
+
+                  {/* Selector de Características */}
+                  {allFeatures.length > 0 && (
+                    <div className="admin-form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label>Características del viaje</label>
+                      <div className="admin-features-grid">
+                        {allFeatures.map(feature => (
+                          <label key={feature.id} className={`admin-feature-chip ${(form.featureIds || []).includes(feature.id) ? 'selected' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={(form.featureIds || []).includes(feature.id)}
+                              onChange={(e) => {
+                                const ids = form.featureIds || [];
+                                setForm(prev => ({
+                                  ...prev,
+                                  featureIds: e.target.checked
+                                    ? [...ids, feature.id]
+                                    : ids.filter(id => id !== feature.id),
+                                }));
+                              }}
+                              style={{ display: 'none' }}
+                            />
+                            <span>{feature.icon}</span>
+                            <span>{feature.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="admin-form-actions">

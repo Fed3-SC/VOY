@@ -482,3 +482,41 @@
     text-align: center;
   }
 }
+
+/* ─── Features Selector (en el form de viajes) ─── */
+.admin-features-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-sm) 0;
+}
+
+.admin-feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-text-secondary);
+  user-select: none;
+  font-weight: 500;
+}
+
+.admin-feature-chip:hover {
+  border-color: var(--color-primary-200);
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.admin-feature-chip.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px var(--color-primary-100);
+}

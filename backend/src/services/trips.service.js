@@ -7,6 +7,7 @@
 
 import { query } from '../config/database.js';
 import { createError } from '../utils/helpers.js';
+import { getFeaturesForTrip, setFeaturesForTrip } from './features.service.js';
 
 /**
  * Formatea un viaje crudo de la BD al formato que espera el frontend.
@@ -84,7 +85,12 @@ export async function search({ origin, destination, date, passengers = 1 }) {
   sql += ` ORDER BY t.departure_time ASC`;
 
   const result = await query(sql, params);
-  return result.rows.map(formatTrip);
+  const trips = result.rows.map(formatTrip);
+  // Cargar features para cada viaje en paralelo
+  await Promise.all(trips.map(async (trip) => {
+    trip.features = await getFeaturesForTrip(trip.id);
+  }));
+  return trips;
 }
 
 /**
@@ -99,7 +105,9 @@ export async function getById(id) {
     throw createError('Viaje no encontrado', 404);
   }
 
-  return formatTrip(result.rows[0]);
+  const trip = formatTrip(result.rows[0]);
+  trip.features = await getFeaturesForTrip(id);
+  return trip;
 }
 
 /**
@@ -113,7 +121,12 @@ export async function getAll(limit = 50, offset = 0) {
     `${BASE_SELECT} WHERE t.active = TRUE ORDER BY t.departure_time ASC LIMIT $1 OFFSET $2`,
     [limit, offset]
   );
-  return result.rows.map(formatTrip);
+  const trips = result.rows.map(formatTrip);
+  // Cargar features para cada viaje en paralelo
+  await Promise.all(trips.map(async (trip) => {
+    trip.features = await getFeaturesForTrip(trip.id);
+  }));
+  return trips;
 }
 
 /**
@@ -243,6 +256,7 @@ export async function create(data) {
     companyId, originCityId, destinationCityId,
     departureTime, arrivalTime, durationMinutes,
     serviceType, price, totalSeats, availableSeats,
+    featureIds = [],
   } = data;
 
   if (originCityId === destinationCityId) {
@@ -262,7 +276,14 @@ export async function create(data) {
     serviceType, price, totalSeats, availableSeats ?? totalSeats,
   ]);
 
-  return getById(result.rows[0].id);
+  const tripId = result.rows[0].id;
+
+  // Asociar features si se proporcionaron
+  if (featureIds.length > 0) {
+    await setFeaturesForTrip(tripId, featureIds);
+  }
+
+  return getById(tripId);
 }
 
 /**
@@ -271,6 +292,8 @@ export async function create(data) {
 export async function update(id, data) {
   // Verificar que existe
   await getById(id);
+
+  const { featureIds, ...tripData } = data;
 
   const fields = [];
   const values = [];
@@ -290,22 +313,25 @@ export async function update(id, data) {
   };
 
   for (const [jsKey, dbCol] of Object.entries(fieldMap)) {
-    if (data[jsKey] !== undefined) {
+    if (tripData[jsKey] !== undefined) {
       fields.push(`${dbCol} = $${paramIndex}`);
-      values.push(data[jsKey]);
+      values.push(tripData[jsKey]);
       paramIndex++;
     }
   }
 
-  if (fields.length === 0) {
-    throw createError('No se proporcionaron campos para actualizar', 400);
+  if (fields.length > 0) {
+    values.push(id);
+    await query(
+      `UPDATE trips SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
+      values
+    );
   }
 
-  values.push(id);
-  await query(
-    `UPDATE trips SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
-    values
-  );
+  // Actualizar features si se proporcionaron
+  if (featureIds !== undefined) {
+    await setFeaturesForTrip(id, featureIds);
+  }
 
   return getById(id);
 }

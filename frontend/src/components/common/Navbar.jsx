@@ -50,9 +50,19 @@ export default function Navbar() {
     navigate('/auth');
   };
 
-  const getUserInitial = () => {
+  const getUserInitials = () => {
     if (!user?.name) return '?';
-    return user.name.charAt(0).toUpperCase();
+    // Nombre principal: primera palabra del nombre
+    const nameParts = user.name.trim().split(/\s+/);
+    const firstInitial = nameParts[0].charAt(0).toUpperCase();
+    
+    // Apellido principal: última palabra del apellido (ej. "Pérez Gómez" -> "Gómez" -> "G")
+    let lastInitial = '';
+    if (user.lastName) {
+      const lastNameParts = user.lastName.trim().split(/\s+/);
+      lastInitial = lastNameParts[lastNameParts.length - 1].charAt(0).toUpperCase();
+    }
+    return `${firstInitial}${lastInitial}`;
   };
 
   return (
@@ -88,7 +98,7 @@ export default function Navbar() {
                 aria-label="Menú de usuario"
                 id="user-menu-trigger"
               >
-                <span className="navbar-user-avatar">{getUserInitial()}</span>
+                <span className="navbar-user-avatar">{getUserInitials()}</span>
                 <span className="navbar-user-name">{user.name}</span>
                 <span className="navbar-user-chevron">▼</span>
               </button>

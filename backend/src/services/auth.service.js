@@ -16,7 +16,7 @@ const SALT_ROUNDS = 10;
  */
 function generateToken(user) {
   return jwt.sign(
-    { id: user.id, email: user.email },
+    { id: user.id, email: user.email, is_admin: user.is_admin || false },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
@@ -34,6 +34,7 @@ function sanitizeUser(user) {
     email: safe.email,
     phone: safe.phone,
     dni: safe.dni,
+    isAdmin: safe.is_admin || false,
     createdAt: safe.created_at,
   };
 }

@@ -108,6 +108,21 @@ export default function BookingPage() {
                   <span className="booking-detail-value">{selectedTrip.passengers || 1}</span>
                 </div>
               </div>
+
+              {/* Características del viaje */}
+              {selectedTrip.features && selectedTrip.features.length > 0 && (
+                <div className="booking-features-section">
+                  <h3 className="booking-features-title">Características</h3>
+                  <div className="booking-features-grid">
+                    {selectedTrip.features.map(feat => (
+                      <div key={feat.id} className="booking-feature-badge" title={feat.name}>
+                        <span className="booking-feature-icon">{feat.icon}</span>
+                        <span className="booking-feature-name">{feat.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
