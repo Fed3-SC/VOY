@@ -4,6 +4,7 @@
 
 .trip-card {
   display: flex;
+  flex-wrap: wrap;
   background: var(--color-white);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
@@ -218,6 +219,71 @@
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
+/* ─── Features Block ─── */
+.trip-card-features {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--color-border-light);
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, rgba(255, 255, 255, 0.6) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.trip-features-title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trip-features-title::before {
+  content: '✦';
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.trip-features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trip-feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.trip-feature-chip:hover {
+  border-color: var(--color-primary-200);
+  background: var(--color-white);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(44, 50, 104, 0.08);
+}
+
+.trip-feature-icon {
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.trip-feature-name {
+  font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .trip-card {
@@ -255,6 +321,10 @@
   .trip-price-block {
     text-align: left;
   }
+
+  .trip-card-features {
+    padding: var(--space-sm) var(--space-md);
+  }
 }
 
 @media (max-width: 480px) {
@@ -266,5 +336,14 @@
   .trip-line {
     transform: rotate(90deg);
     width: 60px;
+  }
+
+  .trip-feature-chip {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+
+  .trip-feature-icon {
+    font-size: var(--font-size-xs);
   }
 }

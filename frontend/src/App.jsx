@@ -14,6 +14,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminFeaturesPage from './pages/AdminFeaturesPage';
+import ProtectedAdminRoute from './components/common/ProtectedAdminRoute';
 // BUG-003a: Páginas de soporte
 import HelpCenterPage from './pages/HelpCenterPage';
 import TermsPage from './pages/TermsPage';
@@ -38,9 +39,9 @@ export default function App() {
                 <Route path="/confirmacion" element={<ConfirmationPage />} />
                 <Route path="/mis-viajes" element={<MyTripsPage />} />
                 <Route path="/perfil" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/users" element={<AdminUsersPage />} />
-                <Route path="/admin/features" element={<AdminFeaturesPage />} />
+                <Route path="/admin" element={<ProtectedAdminRoute><AdminPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/features" element={<ProtectedAdminRoute><AdminFeaturesPage /></ProtectedAdminRoute>} />
                 {/* BUG-003a: Rutas de páginas de soporte */}
                 <Route path="/ayuda" element={<HelpCenterPage />} />
                 <Route path="/terminos" element={<TermsPage />} />

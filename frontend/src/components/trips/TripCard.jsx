@@ -85,6 +85,21 @@ export default function TripCard({ trip, onSelect }) {
           </button>
         </div>
       </div>
+
+      {/* Características del viaje */}
+      {trip.features && trip.features.length > 0 && (
+        <div className="trip-card-features" id={`trip-features-${trip.id}`}>
+          <span className="trip-features-title">Características</span>
+          <div className="trip-features-list">
+            {trip.features.map(feature => (
+              <span key={feature.id} className="trip-feature-chip" title={feature.name}>
+                <span className="trip-feature-icon">{feature.icon}</span>
+                <span className="trip-feature-name">{feature.name}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

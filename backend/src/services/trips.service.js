@@ -243,7 +243,12 @@ export async function getFeatured(count = 10) {
     LIMIT $1
   `, [count]);
 
-  return result.rows.map(formatTrip);
+  const trips = result.rows.map(formatTrip);
+  // Cargar features para cada viaje en paralelo
+  await Promise.all(trips.map(async (trip) => {
+    trip.features = await getFeaturesForTrip(trip.id);
+  }));
+  return trips;
 }
 
 /* ──────────────── CRUD ADMIN ──────────────── */
