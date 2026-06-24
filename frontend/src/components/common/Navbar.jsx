@@ -132,6 +132,15 @@ export default function Navbar() {
                     <span className="user-dropdown-item-icon">🎫</span>
                     Mis viajes
                   </Link>
+                  <Link
+                    to="/favoritos"
+                    className="user-dropdown-item"
+                    onClick={() => { setDropdownOpen(false); setMenuOpen(false); }}
+                    id="dropdown-favorites"
+                  >
+                    <span className="user-dropdown-item-icon">❤️</span>
+                    Mis favoritos
+                  </Link>
 
                   <div className="user-dropdown-divider" />
 

@@ -1,5 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { formatTime, formatDuration, formatPrice, formatServiceType, getServiceTypeColor } from '../../utils/formatters';
 import { destinationImages, getImageKeyByCityName } from '../../utils/imageMap';
+import { useFavorites } from '../../context/FavoritesContext';
+import { useAuth } from '../../context/AuthContext';
 import './TripCard.css';
 
 /* Import all images from src/img */
@@ -16,6 +19,19 @@ function getDestImage(cityName) {
 
 export default function TripCard({ trip, onSelect }) {
   const destImg = getDestImage(trip.destination?.name);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const fav = isFavorite(trip.id);
+
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+    await toggleFavorite(trip.id);
+  };
 
   return (
     <div className="trip-card animate-fade-in" id={`trip-card-${trip.id}`}>
@@ -65,6 +81,27 @@ export default function TripCard({ trip, onSelect }) {
         </div>
 
         <div className="trip-card-right">
+          {/* Botón favorito */}
+          <button
+            className={`trip-favorite-btn ${fav ? 'active' : ''}`}
+            onClick={handleFavoriteClick}
+            aria-label={fav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            id={`fav-btn-${trip.id}`}
+            title={!isAuthenticated ? 'Iniciá sesión para guardar favoritos' : (fav ? 'Quitar de favoritos' : 'Guardar en favoritos')}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="trip-favorite-icon"
+              fill={fav ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+
           <div className="trip-price-block">
             <span className="trip-price">{formatPrice(trip.price)}</span>
             <span className="trip-price-note">por persona</span>

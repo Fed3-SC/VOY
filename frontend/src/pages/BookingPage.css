@@ -312,3 +312,152 @@
 .booking-feature-badge:hover .booking-feature-name {
   color: var(--color-primary);
 }
+
+/* ─── Error State ─── */
+.booking-error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.booking-error-content {
+  text-align: center;
+  background: var(--color-white);
+  padding: var(--space-3xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-light);
+  max-width: 480px;
+}
+
+.booking-error-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.booking-error-content h2 {
+  font-size: var(--font-size-2xl);
+  color: var(--color-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.booking-error-content p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.booking-error-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.booking-retry-btn {
+  padding: 12px 24px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.booking-retry-btn:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.booking-back-alt {
+  padding: 12px 24px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.booking-back-alt:hover {
+  background: var(--color-border);
+}
+
+/* ─── Availability ─── */
+.booking-availability {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.booking-availability-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.availability-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.availability-status.available {
+  background: var(--color-success-bg);
+}
+
+.availability-status.low {
+  background: #fffbeb; /* warning light bg */
+}
+
+.availability-status.sold-out {
+  background: var(--color-error-bg);
+}
+
+.availability-icon {
+  font-size: var(--font-size-2xl);
+}
+
+.availability-label {
+  display: block;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.availability-status.available .availability-label { color: var(--color-success); }
+.availability-status.low .availability-label { color: var(--color-warning); }
+.availability-status.sold-out .availability-label { color: var(--color-error); }
+
+.availability-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.availability-bar-wrapper {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: var(--space-xs);
+}
+
+.availability-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.8s ease-out, background 0.3s ease;
+}
+
+.availability-bar-label {
+  display: block;
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}

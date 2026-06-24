@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getCities } from '../../services/api';
 import { useBooking } from '../../context/BookingContext';
 import { getTodayStr } from '../../utils/formatters';
+import DateRangePicker from './DateRangePicker';
 import './SearchForm.css';
 
 export default function SearchForm({ variant = 'hero' }) {
@@ -90,6 +91,10 @@ export default function SearchForm({ variant = 'hero' }) {
             className="search-input"
             placeholder="¿Desde dónde salís?"
             value={originSearch}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             onChange={(e) => {
               setOriginSearch(e.target.value);
               setShowOriginDropdown(true);
@@ -98,14 +103,14 @@ export default function SearchForm({ variant = 'hero' }) {
             onFocus={() => setShowOriginDropdown(true)}
             id="origin-input"
           />
-          {showOriginDropdown && originSearch && (
+          {showOriginDropdown && (
             <div className="search-dropdown">
               {filteredCities(originSearch, searchParams.destination).map(city => (
                 <button
                   key={city.id}
                   type="button"
                   className="search-dropdown-item"
-                  onClick={() => selectOrigin(city)}
+                  onMouseDown={(e) => { e.preventDefault(); selectOrigin(city); }}
                 >
                   <span className="dropdown-city">{city.name}</span>
                   <span className="dropdown-province">{city.province}</span>
@@ -134,6 +139,10 @@ export default function SearchForm({ variant = 'hero' }) {
             className="search-input"
             placeholder="¿A dónde viajás?"
             value={destSearch}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
             onChange={(e) => {
               setDestSearch(e.target.value);
               setShowDestDropdown(true);
@@ -142,14 +151,14 @@ export default function SearchForm({ variant = 'hero' }) {
             onFocus={() => setShowDestDropdown(true)}
             id="destination-input"
           />
-          {showDestDropdown && destSearch && (
+          {showDestDropdown && (
             <div className="search-dropdown">
               {filteredCities(destSearch, searchParams.origin).map(city => (
                 <button
                   key={city.id}
                   type="button"
                   className="search-dropdown-item"
-                  onClick={() => selectDestination(city)}
+                  onMouseDown={(e) => { e.preventDefault(); selectDestination(city); }}
                 >
                   <span className="dropdown-city">{city.name}</span>
                   <span className="dropdown-province">{city.province}</span>
@@ -162,37 +171,14 @@ export default function SearchForm({ variant = 'hero' }) {
           )}
         </div>
 
-        {/* Date */}
-        <div className="search-field">
-          <label className="search-label">
-            <span className="search-icon">📅</span>
-            Fecha de Ida
-          </label>
-          <input
-            type="date"
-            className="search-input"
-            value={searchParams.date}
-            min={getTodayStr()}
-            onChange={(e) => setSearchParams(prev => ({ ...prev, date: e.target.value }))}
-            id="date-input"
-          />
-        </div>
-
-        {/* Return Date */}
-        <div className="search-field">
-          <label className="search-label">
-            <span className="search-icon">📅</span>
-            Fecha de Vuelta
-          </label>
-          <input
-            type="date"
-            className="search-input"
-            value={searchParams.returnDate}
-            min={searchParams.date || getTodayStr()}
-            onChange={(e) => setSearchParams(prev => ({ ...prev, returnDate: e.target.value }))}
-            id="return-date-input"
-          />
-        </div>
+        {/* Date Range Picker (Ida y Vuelta) */}
+        <DateRangePicker 
+          startDate={searchParams.date}
+          endDate={searchParams.returnDate}
+          onStartDateChange={(val) => setSearchParams(prev => ({ ...prev, date: val }))}
+          onEndDateChange={(val) => setSearchParams(prev => ({ ...prev, returnDate: val }))}
+          minDate={getTodayStr()}
+        />
 
         {/* Passengers */}
         <div className="search-field search-field-small">

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/search/SearchForm';
 import { getPopularDestinations, getAllTrips, getFeaturedTrips } from '../services/api';
 import { useBooking } from '../context/BookingContext';
+import { useFavorites } from '../context/FavoritesContext';
+import { useAuth } from '../context/AuthContext';
 import { formatPrice, formatTime, formatDuration, formatServiceType, getTodayStr } from '../utils/formatters';
 import { destinationImages, getImageKeyByCityName } from '../utils/imageMap';
 import './HomePage.css';
@@ -65,6 +67,8 @@ export default function HomePage() {
   const [tripsLoading, setTripsLoading] = useState(false);
   const navigate = useNavigate();
   const { setSearchParams, resetSearch } = useBooking();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isAuthenticated } = useAuth();
 
   const destsRef = useRef(null);
   const destsSlider = useSlider(destsRef);
@@ -119,6 +123,15 @@ export default function HomePage() {
 
   const handleFeaturedClick = (trip) => {
     navigate(`/reserva/${trip.id}`);
+  };
+
+  const handleFavoriteClick = async (e, tripId) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+    await toggleFavorite(tripId);
   };
 
   return (
@@ -183,6 +196,16 @@ export default function HomePage() {
                     <div className="featured-overlay">
                       <span className="featured-dest">{trip.destination?.name}</span>
                     </div>
+                    <button
+                      className={`featured-fav-btn ${isFavorite(trip.id) ? 'active' : ''}`}
+                      onClick={(e) => handleFavoriteClick(e, trip.id)}
+                      aria-label={isFavorite(trip.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                      id={`fav-featured-${trip.id}`}
+                    >
+                      <svg viewBox="0 0 24 24" fill={isFavorite(trip.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
                   </div>
                   <div className="featured-info">
                     <div className="featured-route">
@@ -243,6 +266,16 @@ export default function HomePage() {
                       <div className="featured-overlay">
                         <span className="featured-dest">{trip.destination?.name}</span>
                       </div>
+                      <button
+                        className={`featured-fav-btn ${isFavorite(trip.id) ? 'active' : ''}`}
+                        onClick={(e) => handleFavoriteClick(e, trip.id)}
+                        aria-label={isFavorite(trip.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                        id={`fav-trip-${trip.id}`}
+                      >
+                        <svg viewBox="0 0 24 24" fill={isFavorite(trip.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="featured-info">
                       <div className="featured-route">
@@ -264,6 +297,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+
               </div>
               
               <div className="home-pagination">

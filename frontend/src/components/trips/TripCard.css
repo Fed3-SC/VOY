@@ -219,6 +219,56 @@
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
+/* ─── Favorite Button ─── */
+.trip-favorite-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+.trip-favorite-btn:hover {
+  border-color: #e91e63;
+  color: #e91e63;
+  background: #fff0f5;
+  transform: scale(1.1);
+}
+
+.trip-favorite-btn.active {
+  background: #fff0f5;
+  border-color: #e91e63;
+  color: #e91e63;
+}
+
+.trip-favorite-btn.active:hover {
+  transform: scale(1.15);
+}
+
+.trip-favorite-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition-fast);
+}
+
+.trip-favorite-btn.active .trip-favorite-icon {
+  animation: heartPop 0.3s ease;
+}
+
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+
 /* ─── Features Block ─── */
 .trip-card-features {
   width: 100%;

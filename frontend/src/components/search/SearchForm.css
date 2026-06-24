@@ -12,7 +12,7 @@
 
 .search-form-fields {
   display: grid;
-  grid-template-columns: 1fr auto 1fr 1fr 1fr 0.6fr;
+  grid-template-columns: 1fr auto 1fr 2fr 0.6fr;
   gap: var(--space-md);
   align-items: end;
   margin-bottom: var(--space-lg);
@@ -170,8 +170,9 @@
     grid-template-columns: 1fr auto 1fr;
   }
 
-  .search-field:nth-child(n+4) {
-    grid-column: span 1;
+  .drp-wrapper,
+  .search-field-small {
+    grid-column: 1 / -1;
   }
 }
 

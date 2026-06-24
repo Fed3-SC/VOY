@@ -203,3 +203,26 @@ export async function deleteFeature(id) {
     method: 'DELETE',
   });
 }
+
+/* ──────────────────────────── FAVORITES ──────────────────────────── */
+
+export async function getFavorites() {
+  return request('/favorites');
+}
+
+export async function getFavoriteIds() {
+  return request('/favorites/ids');
+}
+
+export async function addFavorite(tripId) {
+  return request('/favorites', {
+    method: 'POST',
+    body: JSON.stringify({ tripId }),
+  });
+}
+
+export async function removeFavorite(tripId) {
+  return request(`/favorites/${tripId}`, {
+    method: 'DELETE',
+  });
+}

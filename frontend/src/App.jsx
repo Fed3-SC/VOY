@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { BookingProvider } from './context/BookingContext';
+import { FavoritesProvider } from './context/FavoritesContext';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
@@ -11,6 +12,7 @@ import PaymentPage from './pages/PaymentPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import MyTripsPage from './pages/MyTripsPage';
 import ProfilePage from './pages/ProfilePage';
+import FavoritesPage from './pages/FavoritesPage';
 import AdminPage from './pages/AdminPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminFeaturesPage from './pages/AdminFeaturesPage';
@@ -27,7 +29,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <BookingProvider>
-          <div className="app">
+          <FavoritesProvider>
+            <div className="app">
             <Navbar />
             <main className="app-main">
               <Routes>
@@ -39,6 +42,7 @@ export default function App() {
                 <Route path="/confirmacion" element={<ConfirmationPage />} />
                 <Route path="/mis-viajes" element={<MyTripsPage />} />
                 <Route path="/perfil" element={<ProfilePage />} />
+                <Route path="/favoritos" element={<FavoritesPage />} />
                 <Route path="/admin" element={<ProtectedAdminRoute><AdminPage /></ProtectedAdminRoute>} />
                 <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>} />
                 <Route path="/admin/features" element={<ProtectedAdminRoute><AdminFeaturesPage /></ProtectedAdminRoute>} />
@@ -50,7 +54,8 @@ export default function App() {
               </Routes>
             </main>
             <Footer />
-          </div>
+            </div>
+          </FavoritesProvider>
         </BookingProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
@@ -11,18 +11,40 @@ export default function BookingPage() {
   const navigate = useNavigate();
   const { selectedTrip, setSelectedTrip } = useBooking();
   const { isAuthenticated } = useAuth();
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!selectedTrip) {
+      setLoadError(false);
       getTripById(parseInt(id)).then(res => {
         if (res.success) {
           setSelectedTrip({ ...res.data, passengers: 1 });
         } else {
-          navigate('/');
+          setLoadError(true);
         }
-      });
+      }).catch(() => setLoadError(true));
     }
   }, [id, selectedTrip, setSelectedTrip, navigate]);
+
+  if (loadError) {
+    return (
+      <div className="booking-error-state" style={{ minHeight: '80vh', paddingTop: 'var(--navbar-height)' }}>
+        <div className="booking-error-content">
+          <span className="booking-error-icon">⚠️</span>
+          <h2>No pudimos cargar el viaje</h2>
+          <p>El viaje no existe o hubo un error de conexión.</p>
+          <div className="booking-error-actions">
+            <button className="booking-retry-btn" onClick={() => { setLoadError(false); setSelectedTrip(null); }}>
+              🔄 Reintentar
+            </button>
+            <button className="booking-back-alt" onClick={() => navigate(-1)}>
+              ← Volver
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!selectedTrip) {
     return (
@@ -100,13 +122,62 @@ export default function BookingPage() {
                   <span className="booking-detail-value">{formatDuration(selectedTrip.durationMinutes)}</span>
                 </div>
                 <div className="booking-detail">
-                  <span className="booking-detail-label">💺 Asientos disponibles</span>
-                  <span className="booking-detail-value">{selectedTrip.availableSeats}</span>
-                </div>
-                <div className="booking-detail">
                   <span className="booking-detail-label">👥 Pasajeros</span>
                   <span className="booking-detail-value">{selectedTrip.passengers || 1}</span>
                 </div>
+                <div className="booking-detail">
+                  <span className="booking-detail-label">🏢 Empresa</span>
+                  <span className="booking-detail-value">{selectedTrip.company?.name}</span>
+                </div>
+              </div>
+
+              {/* Sección de Disponibilidad */}
+              <div className="booking-availability">
+                <h3 className="booking-availability-title">Disponibilidad</h3>
+                {selectedTrip.availableSeats === 0 ? (
+                  <div className="availability-status sold-out">
+                    <span className="availability-icon">🚫</span>
+                    <div>
+                      <span className="availability-label">Sin asientos disponibles</span>
+                      <span className="availability-desc">Este viaje está completo</span>
+                    </div>
+                  </div>
+                ) : selectedTrip.availableSeats <= 5 ? (
+                  <div className="availability-status low">
+                    <span className="availability-icon">⚠️</span>
+                    <div>
+                      <span className="availability-label">¡Últimos {selectedTrip.availableSeats} asientos!</span>
+                      <span className="availability-desc">Reservá rápido antes de que se agoten</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="availability-status available">
+                    <span className="availability-icon">✅</span>
+                    <div>
+                      <span className="availability-label">{selectedTrip.availableSeats} asientos disponibles</span>
+                      <span className="availability-desc">de {selectedTrip.totalSeats} totales</span>
+                    </div>
+                  </div>
+                )}
+                {/* Barra visual de ocupación */}
+                {selectedTrip.totalSeats > 0 && (
+                  <div className="availability-bar-wrapper">
+                    <div
+                      className="availability-bar-fill"
+                      style={{
+                        width: `${Math.round(((selectedTrip.totalSeats - selectedTrip.availableSeats) / selectedTrip.totalSeats) * 100)}%`,
+                        background: selectedTrip.availableSeats === 0
+                          ? 'var(--color-error)'
+                          : selectedTrip.availableSeats <= 5
+                          ? 'var(--color-warning)'
+                          : 'var(--color-success)',
+                      }}
+                    />
+                    <span className="availability-bar-label">
+                      {Math.round(((selectedTrip.totalSeats - selectedTrip.availableSeats) / selectedTrip.totalSeats) * 100)}% ocupado
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Características del viaje */}
