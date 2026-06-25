@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/search/SearchForm';
-import { getPopularDestinations, getAllTrips, getFeaturedTrips } from '../services/api';
+import { getAllTrips, getFeaturedTrips } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
@@ -59,7 +59,6 @@ function useSlider(ref) {
 
 export default function HomePage() {
   const [featuredTrips, setFeaturedTrips] = useState([]);
-  const [popularDests, setPopularDests] = useState([]);
   const [trips, setTrips] = useState([]);
   const [totalTrips, setTotalTrips] = useState(0);
   const [page, setPage] = useState(1);
@@ -70,9 +69,6 @@ export default function HomePage() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
 
-  const destsRef = useRef(null);
-  const destsSlider = useSlider(destsRef);
-
   // BUG-002 FIX: Limpiar estado de búsqueda anterior al montar el Home
   useEffect(() => {
     resetSearch();
@@ -80,15 +76,10 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      getFeaturedTrips(10),
-      getPopularDestinations()
-    ]).then(([featuredRes, destsRes]) => {
+      getFeaturedTrips(10)
+    ]).then(([featuredRes]) => {
       if (featuredRes.success) setFeaturedTrips(featuredRes.data);
-      if (destsRes.success) setPopularDests(destsRes.data);
       setLoading(false);
-      setTimeout(() => {
-        destsSlider.checkScroll();
-      }, 100);
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -103,23 +94,6 @@ export default function HomePage() {
     });
   }, [page]);
 
-
-  const handleDestinationClick = (dest) => {
-    const today = getTodayStr();
-    setSearchParams(prev => ({
-      ...prev,
-      origin: 1, // Buenos Aires default
-      destination: dest.cityId,
-      date: today,
-    }));
-    const params = new URLSearchParams({
-      origin: 1,
-      destination: dest.cityId,
-      date: today,
-      passengers: 1,
-    });
-    navigate(`/resultados?${params.toString()}`);
-  };
 
   const handleFeaturedClick = (trip) => {
     navigate(`/reserva/${trip.id}`);
@@ -333,52 +307,6 @@ export default function HomePage() {
               <h3>No hay viajes disponibles por ahora</h3>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Popular Destinations */}
-      <section className="section destinations-section" id="destinations-section">
-        <div className="container">
-          <h2 className="section-title">🗺️ Destinos Populares</h2>
-          <p className="section-subtitle">Los lugares más elegidos por nuestros viajeros</p>
-
-          <div className="slider-wrapper">
-            {destsSlider.canScrollLeft && (
-              <button className="slider-btn slider-btn-left" onClick={() => destsSlider.scroll(-1)} aria-label="Anterior">
-                ‹
-              </button>
-            )}
-            <div className="slider-track destinations-track" ref={destsRef}>
-              {popularDests.map(dest => (
-                <div
-                  key={dest.id}
-                  className="destination-card"
-                  onClick={() => handleDestinationClick(dest)}
-                  id={`dest-card-${dest.id}`}
-                >
-                  <div className="destination-img-wrapper">
-                    {getDestinationImage(dest.imageKey) ? (
-                      <img
-                        src={getDestinationImage(dest.imageKey)}
-                        alt={dest.name}
-                        className="destination-img"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="destination-emoji">📍</span>
-                    )}
-                  </div>
-                  <span className="destination-name">{dest.name}</span>
-                  <span className="destination-trips">{dest.tripsCount} viajes</span>
-                </div>
-              ))}
-            </div>
-            {destsSlider.canScrollRight && (
-              <button className="slider-btn slider-btn-right" onClick={() => destsSlider.scroll(1)} aria-label="Siguiente">
-                ›
-              </button>
-            )}
-          </div>
         </div>
       </section>
 
