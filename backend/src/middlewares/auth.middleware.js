@@ -6,6 +6,7 @@
  */
 
 import jwt from 'jsonwebtoken';
+import { query } from '../config/database.js';
 
 /**
  * Middleware obligatorio: rechaza la request si no hay token válido.
@@ -62,12 +63,28 @@ export function optionalAuth(req, _res, next) {
  * Middleware AdminGuard: solo permite el paso a usuarios con is_admin = true.
  * Debe usarse DESPUÉS de requireAuth.
  */
-export function requireAdmin(req, res, next) {
-  if (!req.user || !req.user.is_admin) {
+export async function requireAdmin(req, res, next) {
+  if (!req.user) {
     return res.status(403).json({
       success: false,
       error: 'Acceso denegado. Se requieren permisos de administrador.',
     });
   }
-  next();
+
+  try {
+    const result = await query('SELECT is_admin FROM users WHERE id = $1', [req.user.id]);
+    
+    if (result.rows.length === 0 || !result.rows[0].is_admin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Acceso denegado. Se requieren permisos de administrador.',
+      });
+    }
+    
+    // Actualizar req.user con el estado real
+    req.user.is_admin = true;
+    next();
+  } catch (error) {
+    next(error);
+  }
 }

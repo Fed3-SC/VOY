@@ -237,7 +237,6 @@ export async function getFeatured(count = 10) {
     JOIN cities dc    ON t.destination_city_id = dc.id
     JOIN companies co ON t.company_id = co.id
     WHERE t.active = TRUE
-      AND t.departure_time >= NOW()
       AND t.available_seats > 0
     ORDER BY RANDOM()
     LIMIT $1
