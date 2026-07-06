@@ -1,10 +1,35 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getCities } from '../services/api';
 import './ProfilePage.css';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const [cities, setCities] = useState([]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    getCities().then(res => {
+      if (res.success) setCities(res.data);
+    });
+  }, []);
+
+  const handleResidenceChange = async (e) => {
+    const cityId = e.target.value ? parseInt(e.target.value) : null;
+    setIsUpdating(true);
+    setMessage('');
+    const res = await updateProfile({ residenceCityId: cityId });
+    if (res.success) {
+      setMessage('Ciudad guardada. ¡Mejoramos tus recomendaciones!');
+      setTimeout(() => setMessage(''), 3000);
+    } else {
+      setMessage('Error al guardar la ciudad.');
+    }
+    setIsUpdating(false);
+  };
 
   if (!isAuthenticated) {
     return (
@@ -63,6 +88,29 @@ export default function ProfilePage() {
                 <span className="profile-field-value">{user.dni}</span>
               </div>
             )}
+            
+            <div className="profile-field residence-field" style={{ gridColumn: '1 / -1', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
+              <span className="profile-field-label">📍 Ciudad de Residencia</span>
+              <div className="residence-select-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+                <select
+                  className="profile-input"
+                  value={user.residenceCityId || ''}
+                  onChange={handleResidenceChange}
+                  disabled={isUpdating}
+                  style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)', color: 'var(--color-text)', fontSize: '1rem' }}
+                >
+                  <option value="">Seleccioná tu ciudad...</option>
+                  {cities.map(city => (
+                    <option key={city.id} value={city.id}>{city.name}, {city.province}</option>
+                  ))}
+                </select>
+                {isUpdating && <span className="residence-spinner">⏳</span>}
+              </div>
+              <p className="residence-help" style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>
+                Usamos tu ciudad para recomendarte los mejores viajes desde tu ubicación.
+              </p>
+              {message && <div className="residence-message" style={{ color: message.includes('Error') ? 'var(--color-error)' : 'var(--color-success)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>{message}</div>}
+            </div>
           </div>
         </div>
 

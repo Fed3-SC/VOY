@@ -35,6 +35,7 @@ function sanitizeUser(user) {
     phone: safe.phone,
     dni: safe.dni,
     isAdmin: safe.is_admin || false,
+    residenceCityId: safe.residence_city_id || null,
     createdAt: safe.created_at,
   };
 }
@@ -44,7 +45,7 @@ function sanitizeUser(user) {
  * @param {{ name, lastName, email, phone, dni, password }} data
  * @returns {{ user, token }}
  */
-export async function register({ name, lastName, email, phone, dni, password }) {
+export async function register({ name, lastName, email, phone, dni, password, residenceCityId }) {
   // Verificar email duplicado
   const emailCheck = await query('SELECT id FROM users WHERE email = $1', [email]);
   if (emailCheck.rows.length > 0) {
@@ -62,10 +63,10 @@ export async function register({ name, lastName, email, phone, dni, password }) 
 
   // Insertar usuario
   const result = await query(
-    `INSERT INTO users (name, last_name, email, phone, dni, password_hash)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO users (name, last_name, email, phone, dni, password_hash, residence_city_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
-    [name, lastName, email, phone, dni, passwordHash]
+    [name, lastName, email, phone, dni, passwordHash, residenceCityId || null]
   );
 
   const user = sanitizeUser(result.rows[0]);

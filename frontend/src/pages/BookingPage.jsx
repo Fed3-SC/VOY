@@ -4,13 +4,29 @@ import { useBooking } from '../context/BookingContext';
 import { useAuth } from '../context/AuthContext';
 import { getTripById } from '../services/api';
 import { formatTime, formatDate, formatDuration, formatPrice, formatServiceType } from '../utils/formatters';
+import { destinationImages, getImageKeyByCityName } from '../utils/imageMap';
 import './BookingPage.css';
+
+/* Import all images from src/img */
+const imageModules = import.meta.glob('../img/*.{jpg,png}', { eager: true });
+
+function getDestinationImage(imageKey) {
+  const filename = destinationImages[imageKey];
+  if (!filename) return null;
+  const matchingKey = Object.keys(imageModules).find(key => key.endsWith(`/${filename}`));
+  return matchingKey ? imageModules[matchingKey].default : null;
+}
+
+function getImageByCityName(cityName) {
+  const key = getImageKeyByCityName(cityName);
+  return key ? getDestinationImage(key) : null;
+}
 
 export default function BookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { selectedTrip, setSelectedTrip } = useBooking();
-  const { isAuthenticated } = useAuth();
+  const { selectedTrip, setSelectedTrip, searchParams } = useBooking();
+  const { isAuthenticated, user } = useAuth();
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
@@ -77,6 +93,16 @@ export default function BookingPage() {
           <div className="booking-main">
             {/* Trip details card */}
             <div className="booking-card animate-fade-in">
+              {getImageByCityName(selectedTrip.destination?.name) && (
+                <div className="booking-hero-image" style={{
+                  height: '200px',
+                  backgroundImage: `url(${getImageByCityName(selectedTrip.destination?.name)})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  borderRadius: '16px 16px 0 0',
+                  marginBottom: '1rem'
+                }}></div>
+              )}
               <div className="booking-card-header">
                 <div className="booking-company">
                   <div className="booking-company-logo">{selectedTrip.company.name.charAt(0)}</div>
@@ -114,9 +140,15 @@ export default function BookingPage() {
 
               <div className="booking-details-grid">
                 <div className="booking-detail">
-                  <span className="booking-detail-label">📅 Fecha</span>
+                  <span className="booking-detail-label">📅 Fecha (Ida)</span>
                   <span className="booking-detail-value">{formatDate(selectedTrip.departureTime)}</span>
                 </div>
+                {searchParams?.returnDate && (
+                  <div className="booking-detail">
+                    <span className="booking-detail-label">🔄 Fecha (Vuelta)</span>
+                    <span className="booking-detail-value">{formatDate(searchParams.returnDate + 'T00:00:00')}</span>
+                  </div>
+                )}
                 <div className="booking-detail">
                   <span className="booking-detail-label">⏱️ Duración</span>
                   <span className="booking-detail-value">{formatDuration(selectedTrip.durationMinutes)}</span>
@@ -191,6 +223,29 @@ export default function BookingPage() {
                         <span className="booking-feature-name">{feat.name}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* User info */}
+              {isAuthenticated && user && (
+                <div className="booking-features-section" style={{ marginTop: '2rem' }}>
+                  <h3 className="booking-features-title">Datos del Pasajero Principal</h3>
+                  <div className="booking-details-grid">
+                    <div className="booking-detail">
+                      <span className="booking-detail-label">Nombre Completo</span>
+                      <span className="booking-detail-value">{user.name} {user.lastName || ''}</span>
+                    </div>
+                    <div className="booking-detail">
+                      <span className="booking-detail-label">Email</span>
+                      <span className="booking-detail-value">{user.email}</span>
+                    </div>
+                    {user.dni && (
+                      <div className="booking-detail">
+                        <span className="booking-detail-label">DNI</span>
+                        <span className="booking-detail-value">{user.dni}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

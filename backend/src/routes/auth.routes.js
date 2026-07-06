@@ -20,6 +20,9 @@ router.post('/login', validate([
   body('password').notEmpty().withMessage('La contraseña es obligatoria'),
 ]), authController.login);
 
+import * as profileController from '../controllers/profile.controller.js';
+
 router.get('/me', requireAuth, authController.me);
+router.patch('/profile', requireAuth, profileController.updateProfile);
 
 export default router;

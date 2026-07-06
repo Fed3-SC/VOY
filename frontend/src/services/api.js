@@ -71,6 +71,10 @@ export async function getAllTrips(limit = 50, offset = 0) {
   return request(`/trips?limit=${limit}&offset=${offset}`);
 }
 
+export async function getRecommendations(limit = 10) {
+  return request(`/trips/recommendations?limit=${limit}`);
+}
+
 /* ──────────────────────────── FEATURED & OFFERS ──────────────────────────── */
 
 export async function getFeaturedTrips(count = 10) {
@@ -162,6 +166,13 @@ export async function getCurrentUser() {
 export async function logout() {
   localStorage.removeItem('voy_token');
   return { success: true };
+}
+
+export async function updateProfile(data) {
+  return request('/auth/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
 }
 
 /* ──────────────────────────── USERS (ADMIN) ──────────────────────────── */

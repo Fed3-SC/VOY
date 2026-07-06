@@ -12,6 +12,7 @@ export default function PaymentPage() {
   const { user, isAuthenticated } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState(null);
 
   if (!selectedTrip) {
     navigate('/');
@@ -28,6 +29,7 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     if (!paymentMethod) return;
     setProcessing(true);
+    setError(null);
 
     const bookingData = {
       tripId: selectedTrip.id,
@@ -45,6 +47,8 @@ export default function PaymentPage() {
     if (res.success) {
       setBooking(res.data);
       navigate('/confirmacion');
+    } else {
+      setError(res.error || 'Ocurrió un error al procesar el pago. Por favor, intentá nuevamente.');
     }
     setProcessing(false);
   };
@@ -115,6 +119,14 @@ export default function PaymentPage() {
             {/* Payment Method */}
             <div className="booking-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <h3 className="payment-section-title">💳 Método de pago</h3>
+              
+              {error && (
+                <div className="payment-error-banner animate-fade-in">
+                  <span className="payment-error-icon">⚠️</span>
+                  {error}
+                </div>
+              )}
+              
               <div className="payment-methods">
                 {paymentMethods.map(method => (
                   <label

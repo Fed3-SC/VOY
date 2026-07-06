@@ -17,6 +17,7 @@ function formatUser(row) {
     phone: row.phone,
     dni: row.dni,
     isAdmin: row.is_admin || false,
+    residenceCityId: row.residence_city_id || null,
     createdAt: row.created_at,
   };
 }
@@ -26,7 +27,7 @@ function formatUser(row) {
  */
 export async function getAll() {
   const result = await query(
-    `SELECT id, name, last_name, email, phone, dni, is_admin, created_at
+    `SELECT id, name, last_name, email, phone, dni, is_admin, residence_city_id, created_at
      FROM users
      ORDER BY created_at DESC`,
     []
@@ -47,7 +48,7 @@ export async function promoteToAdmin(userId) {
   await query('UPDATE users SET is_admin = TRUE WHERE id = $1', [userId]);
 
   const result = await query(
-    `SELECT id, name, last_name, email, phone, dni, is_admin, created_at
+    `SELECT id, name, last_name, email, phone, dni, is_admin, residence_city_id, created_at
      FROM users WHERE id = $1`,
     [userId]
   );
@@ -67,7 +68,7 @@ export async function demoteFromAdmin(userId) {
   await query('UPDATE users SET is_admin = FALSE WHERE id = $1', [userId]);
 
   const result = await query(
-    `SELECT id, name, last_name, email, phone, dni, is_admin, created_at
+    `SELECT id, name, last_name, email, phone, dni, is_admin, residence_city_id, created_at
      FROM users WHERE id = $1`,
     [userId]
   );

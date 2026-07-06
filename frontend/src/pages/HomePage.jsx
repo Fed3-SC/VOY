@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/search/SearchForm';
-import { getAllTrips, getFeaturedTrips } from '../services/api';
+import { getAllTrips, getRecommendations } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
@@ -76,7 +76,7 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      getFeaturedTrips(10)
+      getRecommendations(6)
     ]).then(([featuredRes]) => {
       if (featuredRes.success) setFeaturedTrips(featuredRes.data);
       setLoading(false);
@@ -144,7 +144,7 @@ export default function HomePage() {
         <section className="section featured-section" id="featured-section" style={{ paddingBottom: 0 }}>
           <div className="container">
             <h2 className="section-title">✨ Recomendaciones para vos</h2>
-            <p className="section-subtitle">Descubrí opciones increíbles de forma aleatoria</p>
+            <p className="section-subtitle">Opciones pensadas especialmente para vos</p>
 
             <div className="featured-grid">
               {featuredTrips.map(trip => (

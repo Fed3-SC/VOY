@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import * as tripsController from '../controllers/trips.controller.js';
-import { requireAuth, requireAdmin } from '../middlewares/auth.middleware.js';
+import * as recommendationsController from '../controllers/recommendations.controller.js';
+import { requireAuth, requireAdmin, optionalAuth } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
 // Public routes
+router.get('/recommendations', optionalAuth, recommendationsController.get);
 router.get('/featured', tripsController.getFeatured);
 router.get('/offers', tripsController.getOffers);
 router.get('/popular-destinations', tripsController.getPopularDestinations);

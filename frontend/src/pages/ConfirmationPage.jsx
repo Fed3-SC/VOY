@@ -105,7 +105,10 @@ export default function ConfirmationPage() {
 
           {/* Actions */}
           <div className="confirmation-actions">
-            <button className="confirmation-btn primary" onClick={handleNewSearch} id="new-search-btn">
+            <button className="confirmation-btn primary" onClick={() => navigate('/mis-viajes')} id="my-trips-btn">
+              🎫 Ver en Mis Viajes
+            </button>
+            <button className="confirmation-btn secondary" onClick={handleNewSearch} id="new-search-btn">
               🔍 Buscar otro viaje
             </button>
             <button
