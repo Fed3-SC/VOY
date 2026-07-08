@@ -168,6 +168,29 @@ export async function logout() {
   return { success: true };
 }
 
+/* ──────────────────────────── PASSWORD RESET ──────────────────────────── */
+
+export async function forgotPassword(email) {
+  return request('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function validateResetToken(token) {
+  return request('/auth/validate-reset-token', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function resetPassword(token, password) {
+  return request('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export async function updateProfile(data) {
   return request('/auth/profile', {
     method: 'PATCH',

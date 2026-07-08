@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import BookingPage from './pages/BookingPage';
 import AuthPage from './pages/AuthPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import PaymentPage from './pages/PaymentPage';
 import ConfirmationPage from './pages/ConfirmationPage';
 import MyTripsPage from './pages/MyTripsPage';
@@ -38,6 +39,7 @@ export default function App() {
                 <Route path="/resultados" element={<SearchResultsPage />} />
                 <Route path="/reserva/:id" element={<BookingPage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/restablecer" element={<ResetPasswordPage />} />
                 <Route path="/pago" element={<PaymentPage />} />
                 <Route path="/confirmacion" element={<ConfirmationPage />} />
                 <Route path="/mis-viajes" element={<MyTripsPage />} />

@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { forgotPassword } from '../services/api';
 import { validateEmail, validatePassword, validateDNI, validatePhone, validateRequired } from '../utils/validators';
 import './AuthPage.css';
+import './ResetPasswordPage.css';
 
 export default function AuthPage() {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // login | register | forgot
   const [formData, setFormData] = useState({
     name: '', lastName: '', email: '', phone: '', dni: '', password: '', confirmPassword: '',
   });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotError, setForgotError] = useState('');
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -78,6 +83,103 @@ export default function AuthPage() {
     setLoading(false);
   };
 
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    const emailErr = validateEmail(forgotEmail);
+    if (emailErr) {
+      setForgotError(emailErr);
+      return;
+    }
+
+    setLoading(true);
+    setForgotError('');
+
+    try {
+      await forgotPassword(forgotEmail);
+      setForgotSent(true);
+    } catch {
+      setForgotError('Ocurrió un error. Intentá de nuevo.');
+    }
+
+    setLoading(false);
+  };
+
+  const switchToForgot = () => {
+    setMode('forgot');
+    setForgotEmail(formData.email || '');
+    setForgotSent(false);
+    setForgotError('');
+    setErrors({});
+    setServerError('');
+  };
+
+  const switchToLogin = () => {
+    setMode('login');
+    setErrors({});
+    setServerError('');
+    setForgotSent(false);
+    setForgotError('');
+  };
+
+  // ── Modo: Olvidé mi contraseña ──
+  if (mode === 'forgot') {
+    return (
+      <div className="auth-page">
+        <div className="auth-container animate-fade-in">
+          <div className="auth-header">
+            <img src="/voy-logo.png" alt="Voy" className="auth-logo" />
+            <h1 className="auth-title">¿Olvidaste tu contraseña?</h1>
+            <p className="auth-subtitle">
+              Ingresá tu email y te enviaremos un enlace para restablecerla
+            </p>
+          </div>
+
+          {forgotSent ? (
+            <>
+              <div className="forgot-success">
+                📧 Si el email está registrado, vas a recibir un enlace para restablecer tu contraseña.
+                Revisá tu bandeja de entrada y la carpeta de spam.
+              </div>
+              <button className="forgot-back-btn" onClick={switchToLogin} id="back-to-login-link">
+                ← Volver a Iniciar Sesión
+              </button>
+            </>
+          ) : (
+            <>
+              {forgotError && (
+                <div className="auth-error-banner">{forgotError}</div>
+              )}
+
+              <form className="auth-form" onSubmit={handleForgotSubmit}>
+                <div className="auth-field">
+                  <label className="auth-label">Email</label>
+                  <input
+                    type="email"
+                    className="auth-input"
+                    placeholder="juan@email.com"
+                    value={forgotEmail}
+                    onChange={(e) => { setForgotEmail(e.target.value); setForgotError(''); }}
+                    autoFocus
+                    id="forgot-email-input"
+                  />
+                </div>
+
+                <button type="submit" className="auth-submit" disabled={loading} id="forgot-submit-btn">
+                  {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+                </button>
+              </form>
+
+              <button className="forgot-back-btn" onClick={switchToLogin} id="forgot-back-btn">
+                ← Volver a Iniciar Sesión
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Modo: Login / Register ──
   return (
     <div className="auth-page">
       <div className="auth-container animate-fade-in">
@@ -170,6 +272,14 @@ export default function AuthPage() {
             />
             {errors.password && <span className="auth-field-error">{errors.password}</span>}
           </div>
+
+          {mode === 'login' && (
+            <div className="auth-forgot-link">
+              <button type="button" onClick={switchToForgot} id="forgot-password-link">
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
+          )}
 
           {mode === 'register' && (
             <div className="auth-field">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchForm from '../components/search/SearchForm';
-import { getAllTrips, getRecommendations } from '../services/api';
+import { getAllTrips, getRecommendations, getFeaturedTrips } from '../services/api';
 import { useBooking } from '../context/BookingContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useAuth } from '../context/AuthContext';
@@ -68,6 +68,9 @@ export default function HomePage() {
   const { setSearchParams, resetSearch } = useBooking();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
+  
+  const sliderRef = useRef(null);
+  const { canScrollLeft, canScrollRight, scroll } = useSlider(sliderRef);
 
   // BUG-002 FIX: Limpiar estado de búsqueda anterior al montar el Home
   useEffect(() => {
@@ -76,7 +79,7 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      getRecommendations(6)
+      getRecommendations(8)
     ]).then(([featuredRes]) => {
       if (featuredRes.success) setFeaturedTrips(featuredRes.data);
       setLoading(false);
@@ -85,14 +88,13 @@ export default function HomePage() {
 
   useEffect(() => {
     setTripsLoading(true);
-    getAllTrips(10, (page - 1) * 10).then(res => {
+    getFeaturedTrips(10).then(res => {
       if (res.success) {
         setTrips(res.data);
-        setTotalTrips(res.meta?.total || 0);
       }
       setTripsLoading(false);
     });
-  }, [page]);
+  }, []);
 
 
   const handleFeaturedClick = (trip) => {
@@ -146,14 +148,25 @@ export default function HomePage() {
             <h2 className="section-title">✨ Recomendaciones para vos</h2>
             <p className="section-subtitle">Opciones pensadas especialmente para vos</p>
 
-            <div className="featured-grid">
-              {featuredTrips.map(trip => (
-                <div
-                  key={trip.id}
-                  className="featured-card"
-                  onClick={() => handleFeaturedClick(trip)}
-                  id={`random-card-${trip.id}`}
+            <div className="slider-wrapper" style={{ margin: 'var(--space-xl) 0' }}>
+              {canScrollLeft && (
+                <button 
+                  className="slider-btn slider-btn-left" 
+                  onClick={() => scroll(-1)}
+                  aria-label="Anterior"
                 >
+                  ‹
+                </button>
+              )}
+              
+              <div className="slider-track" ref={sliderRef}>
+                {featuredTrips.map(trip => (
+                  <div
+                    key={trip.id}
+                    className="featured-card recommendation-card"
+                    onClick={() => handleFeaturedClick(trip)}
+                    id={`random-card-${trip.id}`}
+                  >
                   <div className="featured-image">
                     {getImageByCityName(trip.destination?.name) ? (
                       <img
@@ -201,6 +214,17 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+              </div>
+
+              {canScrollRight && (
+                <button 
+                  className="slider-btn slider-btn-right" 
+                  onClick={() => scroll(1)}
+                  aria-label="Siguiente"
+                >
+                  ›
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -274,30 +298,16 @@ export default function HomePage() {
 
               </div>
               
-              <div className="home-pagination">
+              <div className="home-pagination" style={{ borderTop: 'none', marginTop: 'var(--space-md)', paddingTop: 0 }}>
                 <button 
                   className="home-page-btn" 
-                  onClick={() => setPage(1)} 
-                  disabled={page === 1}
+                  style={{ width: '100%', maxWidth: '300px' }}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    document.querySelector('.search-input')?.focus();
+                  }}
                 >
-                  ⏮️ Inicio
-                </button>
-                <button 
-                  className="home-page-btn" 
-                  onClick={() => setPage(p => Math.max(1, p - 1))} 
-                  disabled={page === 1}
-                >
-                  ◀ Anterior
-                </button>
-                <span className="home-page-info">
-                  Página {page} de {Math.max(1, Math.ceil(totalTrips / 10))}
-                </span>
-                <button 
-                  className="home-page-btn" 
-                  onClick={() => setPage(p => Math.min(Math.ceil(totalTrips / 10), p + 1))} 
-                  disabled={page >= Math.ceil(totalTrips / 10)}
-                >
-                  Siguiente ▶
+                  🔍 Buscar más viajes
                 </button>
               </div>
             </>

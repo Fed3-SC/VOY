@@ -391,6 +391,11 @@
   line-height: 1.6;
 }
 
+/* ─── Recommendation Card ─── */
+.recommendation-card {
+  width: calc((100% - 3 * var(--space-lg)) / 4);
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 1024px) {
   .features-grid {
@@ -403,6 +408,10 @@
 
   .slider-btn-right {
     right: 4px;
+  }
+  
+  .recommendation-card {
+    width: calc((100% - var(--space-lg)) / 2);
   }
 }
 
@@ -432,5 +441,9 @@
     width: 36px;
     height: 36px;
     font-size: 1.4rem;
+  }
+  
+  .recommendation-card {
+    width: 85%;
   }
 }

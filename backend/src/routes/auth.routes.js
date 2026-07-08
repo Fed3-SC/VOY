@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import * as authController from '../controllers/auth.controller.js';
+import * as passwordResetController from '../controllers/passwordReset.controller.js';
 import { validate } from '../middlewares/validation.middleware.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 
@@ -25,4 +26,19 @@ import * as profileController from '../controllers/profile.controller.js';
 router.get('/me', requireAuth, authController.me);
 router.patch('/profile', requireAuth, profileController.updateProfile);
 
+// ── Password Reset ──
+router.post('/forgot-password', validate([
+  body('email').isEmail().withMessage('Email inválido'),
+]), passwordResetController.forgotPassword);
+
+router.post('/validate-reset-token', validate([
+  body('token').notEmpty().withMessage('Token requerido'),
+]), passwordResetController.validateResetToken);
+
+router.post('/reset-password', validate([
+  body('token').notEmpty().withMessage('Token requerido'),
+  body('password').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+]), passwordResetController.resetPassword);
+
 export default router;
+
